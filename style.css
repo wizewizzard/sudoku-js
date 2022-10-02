@@ -1,0 +1,98 @@
+html{
+    font-size: 16px;
+}
+body{
+    min-height: 100%;
+    font: 1.2em "Fira Sans", sans-serif;
+    color: #111;
+}
+#container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#prefix{
+    font-size: small;
+    background-color: #ddd;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+
+#sudoku-grid {
+    margin: 1em 0px;
+}
+
+#sudoku-grid td{
+    height:50px;
+    width:50px;
+    border:1px solid;
+    text-align:center;
+    cursor: pointer;
+}
+
+#sudoku-grid tr:first-child td,
+#sudoku-grid tr:nth-child(4) td,
+#sudoku-grid tr:nth-child(7) td
+{
+    border-top:solid;
+}
+
+#sudoku-grid tr:nth-child(1) td:nth-child(odd),
+#sudoku-grid tr:nth-child(3) td:nth-child(odd),
+#sudoku-grid tr:nth-child(5) td:nth-child(odd),
+#sudoku-grid tr:nth-child(7) td:nth-child(odd),
+#sudoku-grid tr:nth-child(9) td:nth-child(odd)
+{
+    background-color: #ddd;
+}
+
+#sudoku-grid tr:nth-child(2) td:nth-child(even),
+#sudoku-grid tr:nth-child(4) td:nth-child(even),
+#sudoku-grid tr:nth-child(6) td:nth-child(even),
+#sudoku-grid tr:nth-child(8) td:nth-child(even)
+{
+    background-color: #ddd;
+}
+
+#sudoku-grid tr:nth-child(3) td,
+#sudoku-grid tr:nth-child(6) td,
+#sudoku-grid tr:last-child td
+{
+    border-bottom:solid;
+}
+
+#sudoku-grid td:first-child, 
+#sudoku-grid td:nth-child(4),
+#sudoku-grid td:nth-child(7)
+{
+    border-left:solid;
+}
+
+#sudoku-grid td:last-child, 
+#sudoku-grid td:nth-child(3),
+#sudoku-grid td:nth-child(6)
+{
+    border-right:solid;
+}
+
+.supposedValuesContainer{
+    font-size: 0.5em;
+    
+}
+
+.button{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.buttonText{
+    font-size: large;
+    font-weight: bold;
+}
+
+.muted{
+    color: gray;
+}
