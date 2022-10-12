@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sudoku game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,109 +14,12 @@
             <h2>Sudoku game</h2>
         </header>
         <div id = "prefix" class="muted">
-            This is a standard sudoku game. 
+            <p>This is a standard sudoku game.</p> 
+            <p>Use single click to put a real value. Ctrl + click to put a supposed value.</p>
         </div>
-        <table id="sudoku-grid">
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        </table>
+        <div id = "sudoku-grid" class="grid3x3">
+            
+        </div>
         <form id="gameForm">
             <label for="difficultySelect">Choose difficulty:</label>
             <select name="difficultySelect" id="difficultySelect">
@@ -126,8 +30,22 @@
             </select>
             <button class="button" id="startNewGameButton" value="New game"><span class="buttonText">New game</span></button>
             <button class="button" id="restartGameButton" value="Restart game"><span class="buttonText">Restart</span></button>
+            <button class="button"><span class="buttonText">Solve it for me please :(</span></button>
         </form>
-        
+        <div id = "numberSelector">
+            <span  class="text"></span><i class="fa fa-window-close" aria-hidden="true"></i>
+            <div class="grid3x3">
+                <div class="cell noselect">1</div>
+                <div class="cell noselect">2</div>
+                <div class="cell noselect">3</div>
+                <div class="cell noselect">4</div>
+                <div class="cell noselect">5</div>
+                <div class="cell noselect">6</div>
+                <div class="cell noselect">7</div>
+                <div class="cell noselect">8</div>
+                <div class="cell noselect">9</div>
+            </div>
+        </div>
     </div>
     <script type="module" src="script.js" ></script>
 </body>
