@@ -83,9 +83,9 @@ body{
     position: absolute;
     /* display: none; */
     background-color: rgba(172, 198, 252, 0.8);
-    border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgb(25, 75, 182);
+    padding: 2px;
+    box-shadow: inset 0px 0px 0px 2px rgb(25, 75, 182);
 }
 
 #numberSelector .grid3x3 {
