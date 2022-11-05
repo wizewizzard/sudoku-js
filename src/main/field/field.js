@@ -3,9 +3,6 @@ function initField(field){
     let currentField = initialField.map(v => {return {value: v, supposedValues: []}});
 
     return {
-        getField(){
-            return initialField;
-        },
         getCell(index){
             return {
                 value: currentField[index].value,

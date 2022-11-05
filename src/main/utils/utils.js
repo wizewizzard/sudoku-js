@@ -1,3 +1,11 @@
+function getRepeats(iterable){
+    const repeats = new Set();
+    const arrCopy = [...iterable].sort();
+    for(let i = 0; i < arrCopy.length - 1; i++)
+        if(arrCopy[i] === arrCopy[i + 1])
+            repeats.add(arrCopy[i]);
+    return Array.from(repeats);
+}
 /**
  * Tests whether value can be placed at the given position
  * @param {*} field 
@@ -45,4 +53,23 @@ function getQuadrant(field, quadrantIndex){
     return field.filter((v, i) => Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3) === quadrantIndex);
 }
 
-export {getColumn, getQuadrant, getRow};
+function isConsistent(field){
+    function isRowConsistent(index){
+        const row = getRow(index);
+
+    }
+    function isColumnConsistent(index){
+        
+    }
+    function isQuadrantConsistent(index){
+        
+    }
+    if(!field)
+        throw new Error("Field must not be null.");
+    
+    
+
+    return {consistent: true};
+}
+
+export {getColumn, getQuadrant, getRow, isConsistent, getRepeats};

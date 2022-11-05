@@ -1,5 +1,4 @@
 import generateField from "./generator/generator.js";
-import {getRow, getColumn, getQuadrant} from './utils/utils.js';
 import {initField} from './field/field.js'
 import {initSelector} from './field/selector.js'
 
