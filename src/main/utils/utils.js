@@ -1,11 +1,39 @@
-function getRepeats(iterable){
-    const repeats = new Set();
-    const arrCopy = [...iterable].sort();
-    for(let i = 0; i < arrCopy.length - 1; i++)
-        if(arrCopy[i] === arrCopy[i + 1])
-            repeats.add(arrCopy[i]);
-    return Array.from(repeats);
+import { constants } from "./constants.js";
+const {COLUMNS_NUM, QUDRANTS_NUM} = constants;
+
+function hasRepeats(iterable){
+    const unique = Array.from(new Set(iterable));
+    let i = 0;
+    for(const val of iterable)
+        i++;
+    return unique.length != i;
 }
+
+function getRepeats(iterable){
+    const copy = [...iterable];
+    const repeats = [];
+
+    repeats.addRepeat = function(_value, index1, index2){
+        for(const repeat of this){
+            if(_value === repeat.value){
+                repeat.pos = [...new Set([...repeat.pos, index1, index2])];
+                return;
+            }
+        }
+        this.push({value: _value, pos: [index1, index2]});
+    } 
+
+    let i = 0;
+    for(let i = 0 ; i < copy.length - 1; i ++){
+        for( let j = i + 1; j < copy.length; j ++)
+            if(copy[i] === copy[j]){
+                repeats.addRepeat(copy[i], i, j);
+            }
+    }
+        
+    return repeats;
+}
+
 /**
  * Tests whether value can be placed at the given position
  * @param {*} field 
@@ -36,7 +64,7 @@ function getRow(field, rowIndex){
  * @param {*} columnIndex 
  */
 function getColumn(field, columnIndex){
-    if(!(field && columnIndex >= 0 && columnIndex < 9))
+    if(!(field && columnIndex >= 0 && columnIndex < COLUMNS_NUM))
         throw new Error("Field and columnIndex are mandatory.");
     return field.filter((v, i) => ((i - columnIndex) % 9 ) === 0);
 }
@@ -48,28 +76,9 @@ function getColumn(field, columnIndex){
  * @param {*} quadrantIndex 
  */
 function getQuadrant(field, quadrantIndex){
-    if(!(field && quadrantIndex >= 0 && quadrantIndex < 9))
+    if(!(field && quadrantIndex >= 0 && quadrantIndex < QUDRANTS_NUM))
         throw new Error("Field and quadrantIndex are mandatory.");
     return field.filter((v, i) => Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3) === quadrantIndex);
 }
 
-function isConsistent(field){
-    function isRowConsistent(index){
-        const row = getRow(index);
-
-    }
-    function isColumnConsistent(index){
-        
-    }
-    function isQuadrantConsistent(index){
-        
-    }
-    if(!field)
-        throw new Error("Field must not be null.");
-    
-    
-
-    return {consistent: true};
-}
-
-export {getColumn, getQuadrant, getRow, isConsistent, getRepeats};
+export {getColumn, getQuadrant, getRow, hasRepeats, getRepeats};

@@ -1,4 +1,4 @@
-import {getRow, getColumn, getQuadrant, isConsistent, getRepeats}  from '../../main/utils/utils.js';
+import {getRow, getColumn, getQuadrant, getRepeats, hasRepeats}  from '../../main/utils/utils.js';
 
 describe("utils test", function(){
     const field = [
@@ -46,28 +46,30 @@ describe("utils test", function(){
             chai.expect(getQuadrant(field, 8)).to.eql([7, 8, 9, 1, 2, 3, 4, 5, 6])
         })
     });
-    describe("Field consistency check", function(){
-        const inconsistentField = [...field];
-        inconsistentField[1] = 2;
-        it("Should return that field is concistent", function(){
-            chai.expect(isConsistent(field)).to.eql({ consistent: true });
-        })
-        // it("Should return that field is not concistent and provide reason and location", function(){
-        //     chai.expect(isConsistent(inconsistentField)).to.eql({ consistent: false, });
-        // })
-    });  
     describe("Iterable repeats", function(){
         it("Should not find any repeats", function(){
             const arr = [1, 2, 3, 6, 4, 5];
             chai.expect(getRepeats(arr)).to.eql([]);
         }),
+        it("Should not find any repeats", function(){
+            const arr = [1, 2, 3, 6, 4, 5];
+            chai.assert.isFalse(hasRepeats(arr));
+        }),
+        it("Should say there are some repeats", function(){
+            const arr = [1, 2, 3, 6, 6, 5];
+            chai.assert.isTrue(hasRepeats(arr));
+        }),
         it("Should find couple repeats", function(){
             const arr = [1, 2, 3, 6, 4, 6, 3, 5];
-            chai.expect(getRepeats(arr)).to.have.members([3, 6]);
+            getRepeats(arr).map(r => r.value);
+            chai.expect(getRepeats(arr).map(r => r.value)).to.have.members([3, 6]);
+            chai.expect(getRepeats(arr).map(r => r.pos)[0]).to.have.members([2, 6]);
+            chai.expect(getRepeats(arr).map(r => r.pos)[1]).to.have.members([3, 5]);
         }),
         it("Should find one repeat", function(){
             const arr = [1, 1, 1, 1, 1];
-            chai.expect(getRepeats(arr)).to.eql([1]);
+            chai.expect(getRepeats(arr).map(r => r.value)).to.eql([1]);
+            chai.expect(getRepeats(arr).map(r => r.pos)[0]).to.have.members([0, 1, 2, 3, 4]);
         }),
         it("Should work correctly on empty array", function(){
             const arr = [];
