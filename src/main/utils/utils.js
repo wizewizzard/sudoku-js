@@ -1,5 +1,5 @@
 import { constants } from "./constants.js";
-const {COLUMNS_NUM, QUDRANTS_NUM} = constants;
+const {COLUMNS_NUM, QUADRANTS_NUM} = constants;
 
 function hasRepeats(iterable){
     const unique = Array.from(new Set(iterable));
@@ -76,7 +76,7 @@ function getColumn(field, columnIndex){
  * @param {*} quadrantIndex 
  */
 function getQuadrant(field, quadrantIndex){
-    if(!(field && quadrantIndex >= 0 && quadrantIndex < QUDRANTS_NUM))
+    if(!(field && quadrantIndex >= 0 && quadrantIndex < QUADRANTS_NUM))
         throw new Error("Field and quadrantIndex are mandatory.");
     return field.filter((v, i) => Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3) === quadrantIndex);
 }
