@@ -2,10 +2,10 @@ import { constants } from "./constants.js";
 const {COLUMNS_NUM, QUADRANTS_NUM} = constants;
 
 function hasRepeats(iterable){
-    const unique = Array.from(new Set(iterable));
+    const unique = Array.from(new Set(iterable)).filter(v => v != null);
     let i = 0;
     for(const val of iterable)
-        i++;
+        if(val != null) i++;
     return unique.length != i;
 }
 
@@ -15,7 +15,7 @@ function getRepeats(iterable){
 
     repeats.addRepeat = function(_value, index1, index2){
         for(const repeat of this){
-            if(_value === repeat.value){
+            if( _value === repeat.value){
                 repeat.pos = [...new Set([...repeat.pos, index1, index2])];
                 return;
             }
@@ -25,10 +25,14 @@ function getRepeats(iterable){
 
     let i = 0;
     for(let i = 0 ; i < copy.length - 1; i ++){
-        for( let j = i + 1; j < copy.length; j ++)
-            if(copy[i] === copy[j]){
-                repeats.addRepeat(copy[i], i, j);
-            }
+        if(copy[i] != null){
+            for( let j = i + 1; j < copy.length; j ++){
+                if(copy[i] === copy[j]){
+                    repeats.addRepeat(copy[i], i, j);
+                }
+            } 
+        }
+        
     }
         
     return repeats;
@@ -81,4 +85,19 @@ function getQuadrant(field, quadrantIndex){
     return field.filter((v, i) => Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3) === quadrantIndex);
 }
 
-export {getColumn, getQuadrant, getRow, hasRepeats, getRepeats};
+function* getRandomGeneratorFromArray(availableValues){
+    function shuffle(array) {
+        const copy = [...array];
+        for (let i = copy.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+    }
+    const shuffled = shuffle([...availableValues]);
+    while(shuffled.length > 0){
+        yield shuffled.pop();
+    }
+}
+
+export {getColumn, getQuadrant, getRow, hasRepeats, getRepeats, getRandomGeneratorFromArray};

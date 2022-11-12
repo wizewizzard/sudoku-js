@@ -1,5 +1,5 @@
 import { constants } from "../utils/constants.js";
-import { getColumn, getQuadrant, getRow, getRepeats } from "../utils/utils.js";
+import { getColumn, getQuadrant, getRow, getRepeats, hasRepeats } from "../utils/utils.js";
 const {FIELD_SIZE, COLUMNS_NUM, ROWS_NUM, QUADRANTS_NUM} = constants;
 
 class Field{
@@ -7,28 +7,28 @@ class Field{
         if(initialField.length != FIELD_SIZE)
             throw new Error('Invalid size of a field');
         this.initialField = [...initialField];
-        this.currentField = initialField.map(v => {return {value: v, supposedValues: []}});
+        this.currentField = {values: [...initialField], supposedValues: [...initialField].map(v => [])};
     }
     [Symbol.iterator](){
-        return currentField[Symbol.iterator]();
+        return this.currentField.values[Symbol.iterator]();
     }
     get length() {
         return this.currentField.length;
     }
     setValue(index, value, supposed){
-        if(index >= 0){
+        if(index >= 0 && index < FIELD_SIZE){
             if(supposed){
-                const i = this.currentField[index].supposedValues.indexOf(value);
+                const valueIndex = this.currentField.supposedValues[index].indexOf(value);
                 if(i >= 0){
-                    this.currentField[index].supposedValues.splice(i, 1);
+                    this.currentField.supposedValues[index].splice(i, 1);
                 }
                 else{
-                    this.currentField[index].supposedValues.push(value);
-                    this.currentField[index].supposedValues = this.currentField[index].supposedValues.sort();
+                    this.currentField.supposedValues[index].push(value);
+                    this.currentField.supposedValues[index] = this.currentField.supposedValues[index].sort();
                 } 
             }
             else{
-                this.currentField[index].value = value === this.currentField[index].value ? null : value;
+                this.currentField.values[index] = value === this.currentField.values[index]? null : value;
             }
         }
         else{
@@ -55,18 +55,17 @@ class Field{
         }
     }
     isConsistent(){  
-        const arrayFlat = this.currentField.map(c => c.value);
-        console.log(getRepeats(getRow(arrayFlat, 0)))
+        const arrayFlat = [...this];
         for( let i = 0; i < ROWS_NUM; i++){
-            if(getRepeats(getColumn(arrayFlat, i)).length > 0)
+            if(hasRepeats(getRow(arrayFlat, i)))
                 return false;
         }
         for( let i = 0; i < COLUMNS_NUM; i++){
-            if(getRepeats(getColumn(arrayFlat, i)).length > 0)
+            if(hasRepeats(getColumn(arrayFlat, i)))
                 return false;
         }
         for( let i = 0; i < QUADRANTS_NUM; i++){
-            if(getRepeats(getQuadrant(arrayFlat, i)).length > 0){
+            if(hasRepeats(getQuadrant(arrayFlat, i))){
                 return false;
             }
         }
