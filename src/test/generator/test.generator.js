@@ -1,9 +1,14 @@
-import generateField from "../../main/generator/generator.js";
+import Generator from "../../main/generator/generator.js";
 
-describe("generator", function() {
+describe("Generator", function() {
 
-    it("Generates field with given strategy", function() {
-        chai.assert.equal(generateField().length, 81);
+    const generator = new Generator();
+
+    it("Generates field array with given strategy", function() {
+        chai.assert.equal(generator.generateFilledFieldArray().length, 81);
     });
   
+    it("Generates field with given strategy", function() {
+        chai.assert.equal(generator.createFieldOfNumberOfCells().length, 81);
+    });
 });

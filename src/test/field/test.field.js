@@ -24,7 +24,7 @@ const fieldArrayInconsistent = [
     9, 8, 7, 3, 2, 1, 4, 5, 6
 ];
 
-describe("field", function() {
+describe("Field", function() {
 
     it("Should not find any repeats and inconsistency", function() {
         const field = new Field(fieldArrayConsistent);

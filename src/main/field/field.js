@@ -13,7 +13,7 @@ class Field{
         return this.currentField.values[Symbol.iterator]();
     }
     get length() {
-        return this.currentField.length;
+        return this.currentField.values.length;
     }
     setValue(index, value, supposed){
         if(index >= 0 && index < FIELD_SIZE){

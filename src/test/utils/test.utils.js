@@ -1,6 +1,6 @@
 import {getRow, getColumn, getQuadrant, getRepeats, hasRepeats, getRandomGeneratorFromArray}  from '../../main/utils/utils.js';
 
-describe("utils test", function(){
+describe("Utils test", function(){
     const field = [
         2, 1, 9, 5, 4, 3, 6, 7, 8,
         5, 4, 3, 8, 7, 6, 9, 1, 2,
@@ -110,7 +110,7 @@ describe("utils test", function(){
         });
     });
 
-    describe("Generator", function(){
+    describe("Generator function", function(){
         it("Should generate same values but in random order", function(){
             const baseValues = [1, 2, 3, 4, 5, 6];
             const randomValuesFromArray = [...getRandomGeneratorFromArray(baseValues)];
