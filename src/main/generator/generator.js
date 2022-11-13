@@ -50,8 +50,14 @@ class Generator{
             const ordinalToRemove = Math.floor(Math.random() * actualValuesCount);
             let j = 0;
             for(let i = 0; i < generatedFieldArray.length ; i++){
-                if( j === ordinalToRemove) generateField[i] = null;
-                if(generatedFieldArray[i] !== null ) j++;
+                if(generatedFieldArray[i] !== null ){
+                    if( j === ordinalToRemove){
+                        generatedFieldArray[i] = null;
+                        break;
+                    } 
+                    j++;
+                }
+                
             }
             actualValuesCount--;
         }
