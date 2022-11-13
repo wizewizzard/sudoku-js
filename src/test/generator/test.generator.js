@@ -11,8 +11,8 @@ describe("Generator", function() {
     it("Generates field object with 10 values", function() {
         const generatedField = generator.createFieldOfNumberOfCells(10);
         let valuesCount = 0;
-        for(const val of generatedField){
-            if(val !== null) valuesCount ++;
+        for(const cell of generatedField){
+            if(cell.value !== null) valuesCount ++;
         }
         chai.assert.equal(generatedField.length, 81);
         chai.assert.equal(valuesCount, 10);
@@ -33,8 +33,8 @@ describe("Generator", function() {
     it("Generates field object with 0 values", function() {
         const generatedField = generator.createFieldOfNumberOfCells(0);
         let valuesCount = 0;
-        for(const val of generatedField){
-            if(val !== null) valuesCount ++;
+        for(const cell of generatedField){
+            if(cell.value !== null) valuesCount ++;
         }
         chai.assert.equal(generatedField.length, 81);
         chai.assert.equal(valuesCount, 0);

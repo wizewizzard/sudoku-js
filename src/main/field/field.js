@@ -9,12 +9,30 @@ class Field{
         this.initialField = [...initialField];
         this.currentField = {values: [...initialField], supposedValues: [...initialField].map(v => [])};
     }
+
     [Symbol.iterator](){
-        return this.currentField.values[Symbol.iterator]();
+        const result = [];
+        let index = 0;
+        for(let i = 0 ; i < this.currentField.values.length; i ++){
+            result.push({
+                value: this.currentField.values[i], 
+                supposedValues: this.currentField.supposedValues[i]
+            });
+        }
+        return {
+            next(){
+                if(index < result.length){
+                    return {value: result[index++], done: false};
+                }
+                return {done: true};
+            }
+        }
     }
+
     get length() {
         return this.currentField.values.length;
     }
+
     setValue(index, value, supposed){
         if(index >= 0 && index < FIELD_SIZE){
             if(supposed){
@@ -35,6 +53,7 @@ class Field{
             console.error("There's no cell selected to perform this operation");
         }
     }
+
     getRow(rowIndex){
         return getRow(this.currentField, rowIndex);
     }
@@ -46,6 +65,7 @@ class Field{
     getQuadrant(quadrantIndex){
         return getQuadrant(this.currentField, quadrantIndex);
     }
+
     getCell(index){
         if(!(index >= 0 && index < FIELD_SIZE))
             throw new Error('Invalid index given');
@@ -54,8 +74,13 @@ class Field{
             supposedValues: this.currentField[index].supposedValues
         }
     }
-    isConsistent(){  
-        const arrayFlat = [...this];
+
+    getFieldValues(){
+        return [...this].map(cell => cell.value);
+    }
+
+    isConsistent(){
+        const arrayFlat = this.getFieldValues();
         for( let i = 0; i < ROWS_NUM; i++){
             if(hasRepeats(getRow(arrayFlat, i)))
                 return false;

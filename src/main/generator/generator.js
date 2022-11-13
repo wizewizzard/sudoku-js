@@ -1,6 +1,7 @@
 import Field from '../field/field.js';
 import {constants} from '../utils/constants.js'
 import { getRandomGeneratorFromArray } from '../utils/utils.js';
+
 const {FIELD_SIZE} = constants;
 
 function getStandardValues(){
@@ -20,6 +21,7 @@ class Generator{
     generateFilledFieldArray(){
         const field = new Array(FIELD_SIZE).fill(null);
         field.isConsistent = Field.prototype.isConsistent;
+        field.getFieldValues = () => field;
         const enumerationStack = [];
         enumerationStack.push({availableValues: getRandomGeneratorFromArray(getStandardValues()), index: 0});
     
