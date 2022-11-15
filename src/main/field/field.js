@@ -7,7 +7,10 @@ class Field{
         if(initialField.length != FIELD_SIZE)
             throw new Error('Invalid size of a field');
         this.initialField = [...initialField];
-        this.currentField = {values: [...initialField], supposedValues: [...initialField].map(v => [])};
+        this.currentField = {
+            values: [...initialField], 
+            supposedValues: [...initialField].map(v => [])
+        };
     }
 
     [Symbol.iterator](){
@@ -70,8 +73,8 @@ class Field{
         if(!(index >= 0 && index < FIELD_SIZE))
             throw new Error('Invalid index given');
         return {
-            value: this.currentField[index].value,
-            supposedValues: this.currentField[index].supposedValues
+            value: this.currentField.values[index],
+            supposedValues: this.currentField.supposedValues[index]
         }
     }
 
