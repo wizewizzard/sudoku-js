@@ -1,201 +1,123 @@
-import generateField from "./generator.js";
-import {getRow} from './sudoku-util.js';
+import Generator from "./src/main/generator/generator.js";
+import Field from './src/main/field/field.js'
+import Selector from './src/main/field/selector.js'
+import getDifficulty from "./src/main/ui/difficulty-range.js";
 
-const GAME_IN_PROGRESS = 1;
-const GAME_NOT_STARTED = 0;
-
-function initGame(){
-    let initialField = null;
-    let currentField = null;
-
-    return {
-        setField(field){
-            if(field){
-                initialField = field;
-                currentField = initialField.map(v => {return {value: v, supposedValues: []};});
-            }
-            else{
-                console.error('Initial field is not initialized');
-            }
-        },
-        resetField(){
-            currentField = initialField?.map(v => {return {value: v, supposedValues: []};});
-        },
-        getCurrentField(){
-            return {
-                forEach(func){
-                    currentField.forEach(func);
-                },
-                getCell(index){
-                    if(currentField){
-                        if(index >= 0 && index < currentField.length){
-                            return {
-                                getValue(){
-                                    return currentField[index].value;
-                                },
-                                getSupposedValues(){
-                                    return currentField[index].supposedValues;
-                                },
-                                setOrRemoveValue( val ){
-                                    console.log( 'Setting value for ', index, 'th cell: ', val );
-                                    if( currentField[index].value === val ) {
-                                        currentField[index].value = null;
-                                    }
-                                    else{
-                                        currentField[index].value = val;
-                                    }
-                                },
-                                addOrRemoveSupposedValue( val ){
-                                    console.log( 'Setting supposed value for ', index, 'th cell: ', val );
-                                    if( currentField[index].supposedValues?.indexOf( val ) >= 0) {
-                                        currentField[index].supposedValues = currentField[index].supposedValues.filter(e => e !== val);
-                                    }
-                                    else{
-                                        currentField[index].supposedValues.push(val)
-                                    }
-                                },
-                            };
-                        }
-                    }
-                },
-            };
-        },
-        getInitialField(){
-            return initialField;
-        },
-        
-    }
-}
-
-const gameObj = initGame();
-
+const generator = new Generator();
 
 document.addEventListener('DOMContentLoaded', function(){
 
-    const sudokuGrid = document.getElementById('sudoku-grid');
-    for ( let q = 0; q < 9; q ++ ){
-        const quadrant = document.createElement('div');
-        quadrant.classList.add('quadrant', 'grid3x3');
-        for (let i = 0; i < 9 ; i ++){
-            const cell = document.createElement('div');
-            cell.classList.add('cell', 'noselect');
-            const valueSpan = document.createElement('span');
-            valueSpan.classList.add('value');
-            const supposedValuesDiv = document.createElement('div');
-            supposedValuesDiv.classList.add('supposedValues', 'hidden');
-            cell.append(supposedValuesDiv);
-            cell.append(valueSpan);
-            quadrant.append(cell);
+    function renderField(field){
+        if(!field){
+            console.error("No field to render");
+            return;
         }
-        sudokuGrid.append(quadrant);
-    }
-
-    function renderField(){
-        gameObj.getCurrentField()?.forEach(({value, supposedValues}, index) => {
-            const element = sudokuGrid.querySelectorAll('.cell')[index];
-            if(value){
-                element.querySelector('.value').textContent = value;
+        let i = 0;
+        for(const cell of field){
+            const cellElement = document.querySelector('#sudoku-grid').querySelector(`.cell[data-index="${i}"]`)
+            const supposedValuesDiv = cellElement.querySelector('.supposedValues');
+            if(cell.value != null){
+                supposedValuesDiv.classList.add('hidden');
+                cellElement.querySelector('.value').textContent = cell.value;
             }
             else{
-                if(supposedValues && supposedValues.length > 0){
-                    const supposedValuesDiv = element.querySelector('.supposedValues');
+                cellElement.querySelector('.value').textContent = '';
+                if(cell.supposedValues && cell.supposedValues.length > 0){
                     supposedValuesDiv.classList.remove('hidden');
-                    const supposedValuesString = supposedValues.join(' ');
+                    const supposedValuesString = cell.supposedValues.join(' ');
                     supposedValuesDiv.textContent = supposedValuesString;
                 }
                 else{
-                    const supposedValuesDiv = element.querySelector('.supposedValues');
                     supposedValuesDiv.classList.add('hidden');
-                    element.querySelector('.value').textContent = '';
                 }
-            }
-        });
+            } 
+            i++;
+        }
     }
 
+    const fieldElement = document.getElementById('sudoku-grid');
+    const selectorElement = document.getElementById('numberSelector');
+    let field;
+    let selector;
+    const cellElements = [];
+    const quadrantElements = [];
+
+    for ( let q = 0; q < 9; q ++ ){
+        const quadrant = document.createElement('div');
+        quadrant.classList.add('quadrant', 'grid3x3');
+        quadrantElements.push(quadrant);
+        fieldElement.append(quadrant);
+    }
+
+    for( let i = 0; i < 81; i++){
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell', 'noselect');
+        const valueSpan = document.createElement('span');
+        valueSpan.classList.add('value');
+        const supposedValuesDiv = document.createElement('div');
+        supposedValuesDiv.classList.add('supposedValues', 'hidden');
+        cellElement.dataset.index = i;
+        cellElement.append(supposedValuesDiv);
+        cellElement.append(valueSpan);
+        quadrantElements[Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
+    }    
+
+    document.getElementById('difficultyRange').addEventListener('input', function(event){
+        const difficulty = getDifficulty(this.value);
+        const difficultyLabelElement = document.getElementById('difficultyLabel');
+        difficultyLabelElement.innerHTML = difficulty.label;
+        [...difficultyLabelElement.classList]
+            .filter(cl => cl.startsWith("difficulty-") && cl !== `difficulty-${difficulty.code}`)
+            .forEach(cl => difficultyLabelElement.classList.remove(cl));
+        difficultyLabelElement.classList.add(`difficulty-${difficulty.code}`);
+        document.getElementById('difficultyRangeValue').innerHTML = this.value;
+    })
+
     document.getElementById('startNewGameButton').addEventListener('click', function(event){
-        const loader = null;
-        //TODO: add loader over field
-        generateField()
-        .then(res => {
-            gameObj.setField(res);
-            renderField();
-        });
+        const startCellsNum = document.getElementById('difficultyRange').value;
+        field = generator.createFieldOfNumberOfCells(startCellsNum);
+        selector = Selector.forField(field);
+        renderField(field);        
     });
     
     document.getElementById('restartGameButton').addEventListener('click', function(event){
-        if(gameObj.getInitialField()){
-            gameObj.setField();
-        }
-        else{
-            console.error('There\'s no field to start with');
-        }
+        
     });
 
-    document.getElementById('numberSelector')
+    let supposed = false;
+
+    selectorElement
         .querySelector('.fa-window-close')
         .addEventListener('click', function (){
             const numberSelector = document.getElementById('numberSelector');
             numberSelector.style.display = 'none';
+            selector.clearSelection();
+            renderField(field);
     });
     
-    {
-        let clickedCell = null;
-        let supposed = null;
-        
-        document.querySelectorAll('#sudoku-grid .cell')
-            .forEach((e, i) => e.addEventListener('click', function (event) {
-                clickedCell = i;
-                if(event.ctrlKey){        
-                    supposed = true;
-                }    
-                else{
-                    supposed = false;
-                }
-                popUpSelector( event.x, event.y );
-        }));
-
-        function popUpSelector( px, py ){
-            const excluded = [];
-            if ( !supposed && gameObj.getCurrentField().getCell(clickedCell).getValue()){
-                excluded.push(gameObj.getCurrentField().getCell(clickedCell).getValue());
-            } 
-            else if( supposed && gameObj.getCurrentField().getCell(clickedCell).getSupposedValues()){
-                excluded.push(gameObj.getCurrentField().getCell(clickedCell).getSupposedValues());
+    fieldElement.querySelectorAll('.cell')
+        .forEach(e => e.addEventListener('click', function (event) {
+            if(event.ctrlKey){        
+                supposed = true;
+            }    
+            else{
+                supposed = false;
             }
+            const index = e.dataset.index;
+            selectorElement.style.left = event.x +"px";
+            selectorElement.style.top = event.y +"px";
+            selectorElement.style.display = 'block';
+            selector.select(index);
+            renderField(field);
+    }));
 
-            const numberSelector = document.getElementById('numberSelector');
-            numberSelector.style.left = px +"px";
-            numberSelector.style.top = py +"px";
-            numberSelector.querySelectorAll('.grid3x3 > .cell')
-                .forEach((e, i) => {
-                    if(excluded.includes(i + 1)){
-                        e.classList.add('disabled');
-                        e.classList.remove('enabled');
-                    }
-                    else{
-                        e.classList.add('enabled');
-                        e.classList.remove('disabled');
-                    }
-                });
-            numberSelector.style.display = 'block';
-        }
+    selectorElement.querySelectorAll('.cell').forEach((e, i) => {
+        e.addEventListener('click', function (event) {
+            selector.setValue(i + 1, supposed);
+            renderField(field);
+        })
+    });
 
-        document.querySelectorAll('#numberSelector .cell').forEach((e, i) => {
-            e.addEventListener('click', function (event) {
-                const { setOrRemoveValue, addOrRemoveSupposedValue } = gameObj.getCurrentField().getCell(clickedCell);
-                if ( supposed ) {
-                    addOrRemoveSupposedValue( i + 1 );
-                }
-                else {
-                    setOrRemoveValue( i + 1 );
-                }
-                renderField();
-            })
-        });
-    }
-
-    
-    
     document.getElementById('gameForm').addEventListener('submit', function(event){
         event.preventDefault();
     })

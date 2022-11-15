@@ -81,11 +81,11 @@ body{
 
 #numberSelector{
     position: absolute;
-    /* display: none; */
+    display: none;
     background-color: rgba(172, 198, 252, 0.8);
-    border-radius: 10px;
     overflow: hidden;
-    border: 1px solid rgb(25, 75, 182);
+    padding: 2px;
+    box-shadow: inset 0px 0px 0px 2px rgb(25, 75, 182);
 }
 
 #numberSelector .grid3x3 {
@@ -144,4 +144,29 @@ body{
           -ms-user-select: none; /* Internet Explorer/Edge */
               user-select: none; /* Non-prefixed version, currently
                                     supported by Chrome, Edge, Opera and Firefox */
+  }
+
+  .difficulty{
+    font-weight: lighter;
+    font-size: 0.7em;
+    color: #555;
+  }
+  .difficulty-vhard{
+    color: hsl(0, 80%, 49%);
+  }
+  
+  .difficulty-hard{
+    color: hsl(19, 80%, 50%);
+  }
+
+  .difficulty-normal{
+    color: hsl(59, 79%, 63%);
+  }
+
+  .difficulty-easy{
+    color: hsl(100, 100%, 60%);
+  }
+
+  .difficulty-veasy{
+    color: hsl(118, 78%, 44%);
   }
