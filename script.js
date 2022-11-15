@@ -1,6 +1,9 @@
-import generateField from "./generator/generator.js";
-import {initField} from './field/field.js'
-import {initSelector} from './field/selector.js'
+import Generator from "./src/main/generator/generator.js";
+import Field from './src/main/field/field.js'
+import Selector from './src/main/field/selector.js'
+import getDifficulty from "./src/main/ui/difficulty-range.js";
+
+const generator = new Generator();
 
 document.addEventListener('DOMContentLoaded', function(){
 
@@ -13,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function(){
         for(const cell of field){
             const cellElement = document.querySelector('#sudoku-grid').querySelector(`.cell[data-index="${i}"]`)
             const supposedValuesDiv = cellElement.querySelector('.supposedValues');
-            if(cell.value){
+            if(cell.value != null){
                 supposedValuesDiv.classList.add('hidden');
                 cellElement.querySelector('.value').textContent = cell.value;
             }
@@ -26,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function(){
                 }
                 else{
                     supposedValuesDiv.classList.add('hidden');
-                    console.log('Nothing to render')
                 }
             } 
             i++;
@@ -60,14 +62,22 @@ document.addEventListener('DOMContentLoaded', function(){
         quadrantElements[Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
     }    
 
+    document.getElementById('difficultyRange').addEventListener('input', function(event){
+        const difficulty = getDifficulty(this.value);
+        const difficultyLabelElement = document.getElementById('difficultyLabel');
+        difficultyLabelElement.innerHTML = difficulty.label;
+        [...difficultyLabelElement.classList]
+            .filter(cl => cl.startsWith("difficulty-") && cl !== `difficulty-${difficulty.code}`)
+            .forEach(cl => difficultyLabelElement.classList.remove(cl));
+        difficultyLabelElement.classList.add(`difficulty-${difficulty.code}`);
+        document.getElementById('difficultyRangeValue').innerHTML = this.value;
+    })
+
     document.getElementById('startNewGameButton').addEventListener('click', function(event){
-        const loader = null;
-        generateField().then(res => {
-            field = initField(res);
-            selector = initSelector(field);
-            renderField(field);
-        });
-        
+        const startCellsNum = document.getElementById('difficultyRange').value;
+        field = generator.createFieldOfNumberOfCells(startCellsNum);
+        selector = Selector.forField(field);
+        renderField(field);        
     });
     
     document.getElementById('restartGameButton').addEventListener('click', function(event){
@@ -86,23 +96,23 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     
     fieldElement.querySelectorAll('.cell')
-        .forEach((e, i) => e.addEventListener('click', function (event) {
+        .forEach(e => e.addEventListener('click', function (event) {
             if(event.ctrlKey){        
                 supposed = true;
             }    
             else{
                 supposed = false;
             }
+            const index = e.dataset.index;
             selectorElement.style.left = event.x +"px";
             selectorElement.style.top = event.y +"px";
             selectorElement.style.display = 'block';
-            selector.select(i);
+            selector.select(index);
             renderField(field);
     }));
 
     selectorElement.querySelectorAll('.cell').forEach((e, i) => {
         e.addEventListener('click', function (event) {
-            console.log("clicked on ", i + 1)
             selector.setValue(i + 1, supposed);
             renderField(field);
         })
