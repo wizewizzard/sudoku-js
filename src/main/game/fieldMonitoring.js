@@ -20,7 +20,7 @@ function isConsistent(field){
     return true;
 }
 
-function checkWinCondition(field){
+function hasWinCondition(field){
     for(const cellValue of field){
         if(cellValue === null) 
             return false;
@@ -28,4 +28,4 @@ function checkWinCondition(field){
     return isConsistent(field);
 }
 
-export {isConsistent, checkWinCondition};
+export {isConsistent, hasWinCondition };
