@@ -1,7 +1,7 @@
 import Generator from "./src/main/generator/generator.js";
 import Field from './src/main/field/field.js'
 import Selector from './src/main/field/selector.js'
-import getDifficulty from "./src/main/ui/difficulty-range.js";
+import getDifficulty from "./src/main/game/difficulty-range.js";
 
 const generator = new Generator();
 
@@ -16,15 +16,18 @@ document.addEventListener('DOMContentLoaded', function(){
         for(const cell of field){
             const cellElement = document.querySelector('#sudoku-grid').querySelector(`.cell[data-index="${i}"]`)
             const supposedValuesDiv = cellElement.querySelector('.supposedValues');
-            if(cell.value != null){
+            if(cell.getValue() != null){
+                if(!cell.isModifiable()){
+                    cellElement.classList.add("unmodifiable");
+                }
                 supposedValuesDiv.classList.add('hidden');
-                cellElement.querySelector('.value').textContent = cell.value;
+                cellElement.querySelector('.value').textContent = cell.getValue();
             }
             else{
                 cellElement.querySelector('.value').textContent = '';
-                if(cell.supposedValues && cell.supposedValues.length > 0){
+                if(cell.getSupposedValues() && cell.getSupposedValues().length > 0){
                     supposedValuesDiv.classList.remove('hidden');
-                    const supposedValuesString = cell.supposedValues.join(' ');
+                    const supposedValuesString = cell.getSupposedValues().join(' ');
                     supposedValuesDiv.textContent = supposedValuesString;
                 }
                 else{

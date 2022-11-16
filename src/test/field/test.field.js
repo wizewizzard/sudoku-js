@@ -1,4 +1,5 @@
 import Field from "../../main/field/field.js";
+import { isConsistent } from "../../main/game/fieldMonitoring.js";
 
 const fieldArrayConsistent = [
     2, 1, null, 5, null, 3, null, 7, 8,
@@ -28,38 +29,38 @@ describe("Field", function() {
 
     it("Should not find any repeats and inconsistency", function() {
         const field = new Field(fieldArrayConsistent);
-        chai.assert.isTrue(field.isConsistent());
+        chai.assert.isTrue(isConsistent(field.getValuesFlat()));
     });
 
     it("Should report that field is not consistent because of repeats in row 0, column 4", function() {
         const field = new Field(fieldArrayInconsistent);
-        chai.assert.isFalse(field.isConsistent());
+        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
     });
 
     it("Empty field should not have any repeats", function() {
         const field = new Field(new Array(81).fill(null));
-        chai.assert.isTrue(field.isConsistent());
+        chai.assert.isTrue(isConsistent(field.getValuesFlat()));
     });
 
     it("Empty field with two repeated values at the same row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(1, 1);
-        chai.assert.isFalse(field.isConsistent());
+        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
     });
 
     it("Empty field with two repeated values at the same column row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(9, 1);
-        chai.assert.isFalse(field.isConsistent());
+        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
     });
 
     it("Empty field with two repeated values at the same qudrannt row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(11, 1);
-        chai.assert.isFalse(field.isConsistent());
+        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
     });
   
 });

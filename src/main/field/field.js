@@ -7,49 +7,55 @@ class Field{
         if(initialField.length != FIELD_SIZE)
             throw new Error('Invalid size of a field');
         this.initialField = [...initialField];
-        this.currentField = {
-            values: [...initialField], 
-            supposedValues: [...initialField].map(v => [])
-        };
+        this.currentField = [...initialField].map(v => {
+            let supposedValues = [];
+            let value = v;
+            return {
+                setValue(_value){
+                    if(!this.isModifiable())
+                        throw new Error("Can not set unmodifiable cell's value");
+                    value = _value === value ? null : _value;
+                },
+                setSupposedValue(_value){
+                    if(!this.isModifiable())
+                        throw new Error("Can not set unmodifiable cell's value")
+                    const i = supposedValues.indexOf(_value);
+                    if(i >= 0){
+                        supposedValues.splice(i, 1);
+                    }
+                    else{
+                        supposedValues.push(_value);
+                        supposedValues = supposedValues.sort();
+                    } 
+                },
+                getValue(){
+                    return value; 
+                },
+                getSupposedValues(){ 
+                    return supposedValues; 
+                },
+                isModifiable() { 
+                    return v == null; 
+                }
+            }});
+        console.debug("Field initialized: ", this.currentField);
     }
 
     [Symbol.iterator](){
-        const result = [];
-        let index = 0;
-        for(let i = 0 ; i < this.currentField.values.length; i ++){
-            result.push({
-                value: this.currentField.values[i], 
-                supposedValues: this.currentField.supposedValues[i]
-            });
-        }
-        return {
-            next(){
-                if(index < result.length){
-                    return {value: result[index++], done: false};
-                }
-                return {done: true};
-            }
-        }
+        return this.currentField[Symbol.iterator]();
     }
 
     get length() {
-        return this.currentField.values.length;
+        return this.currentField.length;
     }
 
     setValue(index, value, supposed){
         if(index >= 0 && index < FIELD_SIZE){
             if(supposed){
-                const valueIndex = this.currentField.supposedValues[index].indexOf(value);
-                if(i >= 0){
-                    this.currentField.supposedValues[index].splice(i, 1);
-                }
-                else{
-                    this.currentField.supposedValues[index].push(value);
-                    this.currentField.supposedValues[index] = this.currentField.supposedValues[index].sort();
-                } 
+                this.currentField[index].setSupposedValue(value);
             }
             else{
-                this.currentField.values[index] = value === this.currentField.values[index]? null : value;
+                this.currentField[index].setValue(value);
             }
         }
         else{
@@ -72,32 +78,11 @@ class Field{
     getCell(index){
         if(!(index >= 0 && index < FIELD_SIZE))
             throw new Error('Invalid index given');
-        return {
-            value: this.currentField.values[index],
-            supposedValues: this.currentField.supposedValues[index]
-        }
+        return this.currentField[index];
     }
 
-    getFieldValues(){
-        return [...this].map(cell => cell.value);
-    }
-
-    isConsistent(){
-        const arrayFlat = this.getFieldValues();
-        for( let i = 0; i < ROWS_NUM; i++){
-            if(hasRepeats(getRow(arrayFlat, i)))
-                return false;
-        }
-        for( let i = 0; i < COLUMNS_NUM; i++){
-            if(hasRepeats(getColumn(arrayFlat, i)))
-                return false;
-        }
-        for( let i = 0; i < QUADRANTS_NUM; i++){
-            if(hasRepeats(getQuadrant(arrayFlat, i))){
-                return false;
-            }
-        }
-        return true;
+    getValuesFlat(){
+        return this.currentField.map(cell => cell.getValue());
     }
 }
 
