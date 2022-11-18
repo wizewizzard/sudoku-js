@@ -1,7 +1,7 @@
 import { constants } from "../utils/constants.js";
 import { hasRepeats, getRow, getColumn, getQuadrant } from "../utils/utils.js";
 
-const {ROWS_NUM, COLUMNS_NUM, QUADRANTS_NUM} = constants;
+const {ROWS_NUM, COLUMNS_NUM, QUADRANTS_NUM, FIELD_SIZE} = constants;
 
 function isConsistent(field){
     for( let i = 0; i < ROWS_NUM; i++){
@@ -20,12 +20,18 @@ function isConsistent(field){
     return true;
 }
 
-function hasWinCondition(field){
+function allCellsFilled(field){
+    let i = 0;
     for(const cellValue of field){
+        i++;
         if(cellValue === null) 
             return false;
     }
+    return i === FIELD_SIZE;
+}
+
+function hasWinCondition(field){
     return isConsistent(field);
 }
 
-export {isConsistent, hasWinCondition };
+export {isConsistent, hasWinCondition, allCellsFilled};

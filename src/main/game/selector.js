@@ -4,6 +4,7 @@ class Selector{
     }
 
     constructor(field){
+        this.disabled = false;
         this.field = field;
         this.supposed = false;
         this.selectedCellIndex = -1;
@@ -18,8 +19,12 @@ class Selector{
         this.selectedCellIndex = -1;
     }
 
+    disable(){
+        this.disabled = true;
+    }
+
     setValue(value){
-        if(this.selectedCellIndex < 0)
+        if(!this.disabled && this.selectedCellIndex < 0)
             throw new Error("Select cell first in order to put value");
             this.field.setValue(this.selectedCellIndex, value, this.supposed);
     }

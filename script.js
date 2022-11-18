@@ -1,7 +1,7 @@
 import Generator from "./src/main/generator/generator.js";
-import Selector from './src/main/field/selector.js'
+import Selector from './src/main/game/selector.js'
 import getDifficulty from "./src/main/game/difficulty-range.js";
-import { EventEmitter, winCheckSubscriber, winConditionSubscriber } from "./src/main/game/gameLifeCycle.js";
+import { EventEmitter, winCheckSubscriber, winConditionSubscriber, events } from "./src/main/game/gameLifeCycle.js";
 
 const generator = new Generator();
 
@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     const fieldElement = document.getElementById('sudoku-grid');
     const selectorElement = document.getElementById('numberSelector');
+    const winConditionModalElement = document.getElementById('winConditionModal');
     const eventEmitter = new EventEmitter();
     let field;
     let selector;
@@ -97,28 +98,36 @@ document.addEventListener('DOMContentLoaded', function(){
         field = generator.createFieldOfNumberOfCells(startCellsNum);
         selector = Selector.forField(field);
         eventEmitter.emit({ 
-            getName: () =>  'gameStart', 
+            event: events.GAME_START, 
             startCellsNum,
             field
         });
-        const winCheckSub = winCheckSubscriber(field, eventEmitter);
-        const winConditionSub = winConditionSubscriber(field, eventEmitter);
-        eventEmitter.subscribe('valueWasSet', winCheckSub);
-        eventEmitter.subscribe('winCondition', winConditionSub);
+        eventEmitter.subscribe(events.VALUE_SET, winCheckSubscriber(field, eventEmitter));
+        eventEmitter.subscribe(events.WIN_CONDITION, winConditionSubscriber(field, selector, eventEmitter));
+        eventEmitter.subscribe(events.WIN_CONDITION, function(){
+            document.getElementById('winConditionModal').style.display = "block";
+        })
         renderField(field);        
     });
     
     document.getElementById('restartGameButton').addEventListener('click', function(event){
         eventEmitter.emit({ 
-            getName: () =>  'gameRestart'
+            event: events.GAME_RESTART
         });
+    });
+
+    winConditionModalElement
+    .querySelector('.fa-window-close')
+        .addEventListener('click', function (){
+            winConditionModalElement.style.display = 'none';
+            
     });
 
     selectorElement
         .querySelector('.fa-window-close')
         .addEventListener('click', function (){
-            document.getElementById('numberSelector').style.display = 'none';
             selector.clearSelection();
+            selectorElement.style.display = 'none';
             renderField(field);
     });
     
@@ -126,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function(){
         .forEach(e => e.addEventListener('click', function (event) {
             selector.select(e.dataset.index, Boolean(event.ctrlKey));
             eventEmitter.emit({ 
-                getName: () =>  'cellSelected', 
+                event: events.CELL_SELECTED, 
                 value: e.dataset.index 
             });
             renderSelector(selector, event.x, event.y);
@@ -137,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function(){
         e.addEventListener('click', function (event) {
             selector.setValue(i + 1);
             eventEmitter.emit({ 
-                getName: () =>  'valueWasSet', 
+                event: events.VALUE_SET, 
                 value: i + 1
             });
             renderSelector(selector);

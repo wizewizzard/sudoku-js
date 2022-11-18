@@ -1,13 +1,22 @@
-import { hasWinCondition } from "./fieldMonitoring.js";
+import { hasWinCondition, allCellsFilled } from "./fieldMonitoring.js";
+
+const events = Object.freeze({
+    GAME_START: 'gameStart',
+    GAME_RESTART: 'gameRestart',
+    VALUE_SET: 'valueSet',
+    CELL_SELECTED: 'cellSelected',
+    FIELD_FILLED: 'fieldIsFull',
+    WIN_CONDITION: 'winCondition'
+});
 
 class EventEmitter{
     constructor(){
         this.listeners = new Map();
     }
-    emit(event){
-        if(this.listeners.has(event.getName())){
-            for(const fn of this.listeners.get(event.getName()) ){
-                fn(event);
+    emit(data){
+        if(this.listeners.has(data.event)){
+            for(const fn of this.listeners.get(data.event) ){
+                fn(data);
             }
         }
     }
@@ -29,16 +38,17 @@ class EventEmitter{
 
 function winCheckSubscriber(field, emitter){
     return function(event){
-        if(hasWinCondition(field.getValuesFlat())){
-            emitter.emit({getName: () => 'winCondition'})
+        if(allCellsFilled(field.getValuesFlat()) && hasWinCondition(field.getValuesFlat())){
+            emitter.emit({event: events.WIN_CONDITION})
         }
     }
 }
 
-function winConditionSubscriber(field, emitter){
+function winConditionSubscriber(field, selector, emitter){
+    
     return function(event){
-        console.log('You won!');
+        selector.disable();
     }
 }
 
-export {EventEmitter, winCheckSubscriber, winConditionSubscriber};
+export {EventEmitter, events, winCheckSubscriber, winConditionSubscriber};
