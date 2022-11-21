@@ -1,66 +1,40 @@
-import Generator from "./src/main/generator/generator.js";
-import Field from './src/main/field/field.js'
-import Selector from './src/main/field/selector.js'
-import getDifficulty from "./src/main/ui/difficulty-range.js";
-
-const generator = new Generator();
+import getDifficulty from "./src/main/game/difficulty-range.js";
+import { EventEmitter, startGameSubscriber, events } from "./src/main/game/gameLifeCycle.js";
+import { getFieldUI, getSelectorUI } from "./src/main/ui/render.js";
 
 document.addEventListener('DOMContentLoaded', function(){
-
-    function renderField(field){
-        if(!field){
-            console.error("No field to render");
-            return;
+    function prepareField() {
+        const quadrantElements = [];
+        for (let q = 0; q < 9; q++) {
+            const quadrant = document.createElement('div');
+            quadrant.classList.add('quadrant', 'grid3x3');
+            quadrantElements.push(quadrant);
+            fieldElement.append(quadrant);
         }
-        let i = 0;
-        for(const cell of field){
-            const cellElement = document.querySelector('#sudoku-grid').querySelector(`.cell[data-index="${i}"]`)
-            const supposedValuesDiv = cellElement.querySelector('.supposedValues');
-            if(cell.value != null){
-                supposedValuesDiv.classList.add('hidden');
-                cellElement.querySelector('.value').textContent = cell.value;
-            }
-            else{
-                cellElement.querySelector('.value').textContent = '';
-                if(cell.supposedValues && cell.supposedValues.length > 0){
-                    supposedValuesDiv.classList.remove('hidden');
-                    const supposedValuesString = cell.supposedValues.join(' ');
-                    supposedValuesDiv.textContent = supposedValuesString;
-                }
-                else{
-                    supposedValuesDiv.classList.add('hidden');
-                }
-            } 
-            i++;
+
+        for (let i = 0; i < 81; i++) {
+            const cellElement = document.createElement('div');
+            cellElement.classList.add('cell', 'noselect');
+            const valueSpan = document.createElement('span');
+            valueSpan.classList.add('value');
+            const supposedValuesDiv = document.createElement('div');
+            supposedValuesDiv.classList.add('supposedValues', 'hidden');
+            cellElement.dataset.index = i;
+            cellElement.append(supposedValuesDiv);
+            cellElement.append(valueSpan);
+            quadrantElements[Math.floor(i / 27) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
         }
     }
-
     const fieldElement = document.getElementById('sudoku-grid');
     const selectorElement = document.getElementById('numberSelector');
-    let field;
-    let selector;
-    const cellElements = [];
-    const quadrantElements = [];
+    const {render : renderField, clear: clearField } = getFieldUI(fieldElement);
+    const {show: showSelector, hide: hideSelector} = getSelectorUI(selectorElement);
+    const winConditionModalElement = document.getElementById('winConditionModal');
+    const emitter = new EventEmitter();
+    let [cellSelected, supposedFlag ] = [-1, false];
+    emitter.subscribe(events.GAME_START, startGameSubscriber(emitter))
 
-    for ( let q = 0; q < 9; q ++ ){
-        const quadrant = document.createElement('div');
-        quadrant.classList.add('quadrant', 'grid3x3');
-        quadrantElements.push(quadrant);
-        fieldElement.append(quadrant);
-    }
-
-    for( let i = 0; i < 81; i++){
-        const cellElement = document.createElement('div');
-        cellElement.classList.add('cell', 'noselect');
-        const valueSpan = document.createElement('span');
-        valueSpan.classList.add('value');
-        const supposedValuesDiv = document.createElement('div');
-        supposedValuesDiv.classList.add('supposedValues', 'hidden');
-        cellElement.dataset.index = i;
-        cellElement.append(supposedValuesDiv);
-        cellElement.append(valueSpan);
-        quadrantElements[Math.floor(i / 27 ) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
-    }    
+    prepareField();    
 
     document.getElementById('difficultyRange').addEventListener('input', function(event){
         const difficulty = getDifficulty(this.value);
@@ -74,53 +48,62 @@ document.addEventListener('DOMContentLoaded', function(){
     })
 
     document.getElementById('startNewGameButton').addEventListener('click', function(event){
+        function renderFieldSubscriber({payload: {field}}){
+            console.trace('ValueSetSubscriber subscriber triggered');
+            renderField(field);
+        }
+
+        function winConditionModalSubscriber(){
+            console.trace('winConditionModalSubscriber triggered');
+            winConditionModalElement.style.display = 'block';
+        }
+
         const startCellsNum = document.getElementById('difficultyRange').value;
-        field = generator.createFieldOfNumberOfCells(startCellsNum);
-        selector = Selector.forField(field);
-        renderField(field);        
+        emitter.subscribe(events.FIELD_UPDATED, renderFieldSubscriber);
+        emitter.subscribe(events.WIN_CONDITION, winConditionModalSubscriber);
+        emitter.subscribe(events.WIN_CONDITION, function dispose(){
+            emitter.unSubscribe(events.FIELD_UPDATED, renderFieldSubscriber);
+            emitter.unSubscribe(events.WIN_CONDITION, winConditionModalSubscriber);
+            emitter.unSubscribe(events.WIN_CONDITION, dispose);
+        });
+        emitter.emit({eventName: events.GAME_START, payload: {startCellsNum}});
     });
     
     document.getElementById('restartGameButton').addEventListener('click', function(event){
-        
+        emitter.emit({ eventName: events.GAME_RESTART, payload: {startCellsNum } });
     });
 
-    let supposed = false;
+    winConditionModalElement
+        .querySelector('.fa-window-close')
+            .addEventListener('click', function (){
+                winConditionModalElement.style.display = 'none';
+        });
 
     selectorElement
         .querySelector('.fa-window-close')
         .addEventListener('click', function (){
-            const numberSelector = document.getElementById('numberSelector');
-            numberSelector.style.display = 'none';
-            selector.clearSelection();
-            renderField(field);
+            hideSelector();
     });
     
     fieldElement.querySelectorAll('.cell')
         .forEach(e => e.addEventListener('click', function (event) {
-            if(event.ctrlKey){        
-                supposed = true;
-            }    
-            else{
-                supposed = false;
-            }
-            const index = e.dataset.index;
-            selectorElement.style.left = event.x +"px";
-            selectorElement.style.top = event.y +"px";
-            selectorElement.style.display = 'block';
-            selector.select(index);
-            renderField(field);
+            [cellSelected, supposedFlag] = [e.dataset.index, Boolean(event.ctrlKey)];
+            showSelector({lx: event.x, ty: event.y});
     }));
 
     selectorElement.querySelectorAll('.cell').forEach((e, i) => {
         e.addEventListener('click', function (event) {
-            selector.setValue(i + 1, supposed);
-            renderField(field);
-        })
+            emitter.emit({ 
+                eventName: events.VALUE_SET, 
+                payload: { value: i + 1, index: cellSelected, suppossed: supposedFlag }    
+            });
+        });
     });
 
     document.getElementById('gameForm').addEventListener('submit', function(event){
         event.preventDefault();
     })
+
 });
 
 
