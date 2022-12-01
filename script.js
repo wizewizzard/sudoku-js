@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const fieldElement = document.getElementById('sudoku-grid');
     const selectorElement = document.getElementById('numberSelector');
     const {render : renderField, clear: clearField } = getFieldUI(fieldElement);
-    const {show: showSelector, hide: hideSelector} = getSelectorUI(selectorElement);
+    let showSelector, updateSelector, hideSelector;
     const winConditionModalElement = document.getElementById('winConditionModal');
     const emitter = new EventEmitter();
     let [cellSelected, supposedFlag ] = [-1, false];
@@ -48,29 +48,43 @@ document.addEventListener('DOMContentLoaded', function(){
     })
 
     document.getElementById('startNewGameButton').addEventListener('click', function(event){
-        function renderFieldSubscriber({payload: {field}}){
-            console.trace('ValueSetSubscriber subscriber triggered');
+        emitter.emit({eventName: events.GAME_ENDED});
+        function renderFieldSubscriber({data: {field}}){
+            //console.trace('ValueSetSubscriber subscriber triggered');
             renderField(field);
         }
 
         function winConditionModalSubscriber(){
-            console.trace('winConditionModalSubscriber triggered');
+            //console.trace('winConditionModalSubscriber triggered');
             winConditionModalElement.style.display = 'block';
+        }
+
+        function renderSelectorSubscriber({data: {cell, ...rest}}){
+            //console.trace('renderSelectorSubscriber triggered');
+            if(cell){
+                ({show: showSelector, update: updateSelector, hide: hideSelector} = getSelectorUI({selectorElement, cell, ...rest}));
+                showSelector();
+            }
+            else{
+                hideSelector();
+            }
         }
 
         const startCellsNum = document.getElementById('difficultyRange').value;
         emitter.subscribe(events.FIELD_UPDATED, renderFieldSubscriber);
         emitter.subscribe(events.WIN_CONDITION, winConditionModalSubscriber);
-        emitter.subscribe(events.WIN_CONDITION, function dispose(){
+        emitter.subscribe(events.CELL_SELECTED, renderSelectorSubscriber);
+        emitter.subscribe(events.GAME_ENDED, function dispose(){
             emitter.unSubscribe(events.FIELD_UPDATED, renderFieldSubscriber);
             emitter.unSubscribe(events.WIN_CONDITION, winConditionModalSubscriber);
-            emitter.unSubscribe(events.WIN_CONDITION, dispose);
+            emitter.unSubscribe(events.GAME_ENDED, dispose);
+            hideSelector();
         });
-        emitter.emit({eventName: events.GAME_START, payload: {startCellsNum}});
+        emitter.emit({eventName: events.GAME_START, data: {startCellsNum}});
     });
     
     document.getElementById('restartGameButton').addEventListener('click', function(event){
-        emitter.emit({ eventName: events.GAME_RESTART, payload: {startCellsNum } });
+        emitter.emit({ eventName: events.GAME_RESTART, data: {startCellsNum}});
     });
 
     winConditionModalElement
@@ -85,18 +99,36 @@ document.addEventListener('DOMContentLoaded', function(){
             hideSelector();
     });
     
+    // Click on field cell event fires CELL_SELECT event
     fieldElement.querySelectorAll('.cell')
         .forEach(e => e.addEventListener('click', function (event) {
-            [cellSelected, supposedFlag] = [e.dataset.index, Boolean(event.ctrlKey)];
-            showSelector({lx: event.x, ty: event.y});
+            cellSelected = cellSelected && Number(e.dataset.index) === cellSelected ? null : Number(e.dataset.index);
+            console.log('Ctrl key down: ', Boolean(event.ctrlKey));
+            supposedFlag = Boolean(event.ctrlKey);
+            emitter.emit({
+                eventName: events.CELL_SELECT,
+                data:
+                {
+                    index: cellSelected,
+                    supposed: supposedFlag,
+                    x: event.x,
+                    y: event.y
+                }
+            });
     }));
 
+    // Click on selector's cell event fires VALUE_SET event
     selectorElement.querySelectorAll('.cell').forEach((e, i) => {
         e.addEventListener('click', function (event) {
             emitter.emit({ 
                 eventName: events.VALUE_SET, 
-                payload: { value: i + 1, index: cellSelected, suppossed: supposedFlag }    
+                data: {
+                    value: Number(e.dataset.number), 
+                    index: cellSelected, 
+                    supposed: supposedFlag 
+                }
             });
+            updateSelector();
         });
     });
 

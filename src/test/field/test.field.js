@@ -101,4 +101,16 @@ describe("Win conditions", function(){
         const field = new Field(fieldArrayHasNoWinCondition);
         chai.assert.isFalse(hasWinCondition(field.getValuesFlat()));
     });
+});
+
+describe("Setting values for fields", function(){
+    it("Should create two fields and set value on it", function(){
+        let field1 = new Field(fieldArrayConsistent);
+        field1.setValue(2, 3);
+        chai.assert.equal(field1.getCell(2).getValue(), 3);
+        field1 = new Field(fieldArrayConsistent);
+        field1.setValue(2, 5);
+        chai.assert.equal(field1.getCell(2).getValue(), 5);
+    })
 })
+

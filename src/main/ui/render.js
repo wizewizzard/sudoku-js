@@ -13,6 +13,9 @@ function getFieldUI(fieldElement){
                     if(!cell.isModifiable()){
                         cellElement.classList.add("unmodifiable");
                     }
+                    else{
+                        cellElement.classList.remove("unmodifiable");
+                    }
                     supposedValuesDiv.classList.add('hidden');
                     cellElement.querySelector('.value').textContent = cell.getValue();
                 }
@@ -36,14 +39,37 @@ function getFieldUI(fieldElement){
     }
 }
 
-function getSelectorUI(selectorElement){
+function getSelectorUI({selectorElement, cell, supposed, x, y}){
+    const {getSupposedValues, getValue} = cell;
     return {
-        show({numbersChosen, lx, ty} ){
-            if(lx && ty){
-                selectorElement.style.left = lx +"px";
-                selectorElement.style.top = ty +"px";
+        show(){
+            console.log(getSupposedValues(), getValue());
+            const disabledValues = supposed ? getSupposedValues() : [getValue()];
+            selectorElement.querySelectorAll('.cell').forEach(element => {
+                if(disabledValues.indexOf(Number(element.dataset.number )) != -1){
+                    element.classList.add('selected');
+                }
+                else{
+                    element.classList.remove('selected');
+                }
+            });
+
+            if(x && y){
+                selectorElement.style.left = x +"px";
+                selectorElement.style.top = y +"px";
                 selectorElement.style.display = 'block';
             }
+        },
+        update(){
+            const disabledValues = supposed ? getSupposedValues() : [getValue()];
+            selectorElement.querySelectorAll('.cell').forEach(element => {
+                if(disabledValues.indexOf(Number(element.dataset.number )) != -1){
+                    element.classList.add('selected');
+                }
+                else{
+                    element.classList.remove('selected');
+                }
+            });
         },
         hide(){
             selectorElement.style.display = 'none';
