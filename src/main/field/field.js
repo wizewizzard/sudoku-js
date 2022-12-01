@@ -35,7 +35,7 @@ class Field{
                     return supposedValues; 
                 },
                 isModifiable() { 
-                    return v == null; 
+                    return v === null; 
                 }
             }});
         console.debug("Field initialized: ", this.currentField);
