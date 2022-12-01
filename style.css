@@ -97,7 +97,10 @@ body{
     padding: 5px 5px;
     margin: 3px;
     border-radius: 5px;
-    
+}
+
+#numberSelector .selected{
+    color: #888;
 }
 
 .fa-window-close{
@@ -140,6 +143,9 @@ body{
 .cell.disabled{
     cursor: pointer;
     background-color: rgb(129, 148, 202);
+}
+.unmodifiable{
+    color:rgb(124, 135, 158);
 }
 
 .button{
