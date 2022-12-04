@@ -39,14 +39,15 @@ function getFieldUI(fieldElement){
     }
 }
 
-function getSelectorUI({selectorElement, cell, supposed, x, y}){
-    const {getSupposedValues, getValue} = cell;
+function getSelectorUI(selectorElement){
     return {
-        show(){
-            console.log(getSupposedValues(), getValue());
-            const disabledValues = supposed ? getSupposedValues() : [getValue()];
+        render(selector, {x, y}){
+            if(!selector){
+                console.error("No selector to render");
+                return;
+            }
             selectorElement.querySelectorAll('.cell').forEach(element => {
-                if(disabledValues.indexOf(Number(element.dataset.number )) != -1){
+                if(selector.getExcludedValues().indexOf(Number(element.dataset.number )) != -1){
                     element.classList.add('selected');
                 }
                 else{
@@ -60,21 +61,10 @@ function getSelectorUI({selectorElement, cell, supposed, x, y}){
                 selectorElement.style.display = 'block';
             }
         },
-        update(){
-            const disabledValues = supposed ? getSupposedValues() : [getValue()];
-            selectorElement.querySelectorAll('.cell').forEach(element => {
-                if(disabledValues.indexOf(Number(element.dataset.number )) != -1){
-                    element.classList.add('selected');
-                }
-                else{
-                    element.classList.remove('selected');
-                }
-            });
-        },
         hide(){
             selectorElement.style.display = 'none';
         }
-    }
+    };
 }
 
 

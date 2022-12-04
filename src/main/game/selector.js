@@ -1,42 +1,19 @@
-class Selector{
-    static forField(field){
-        return new Selector(field);
-    }
+function Selector(field, index, forSupposed){
+    this.index = index;
+    this.field = field;
+    this.forSupposed = forSupposed;
+}
 
-    constructor(field){
-        this.disabled = false;
-        this.field = field;
-        this.supposed = false;
-        this.selectedCellIndex = -1;
-    }
+Selector.prototype.setValue = function(value){
+    this.field.setValue(this.index, value, this.forSupposed)
+}
 
-    select(cellIndex, supposed){
-        this.suposed = supposed;
-        this.selectedCellIndex = cellIndex;
+Selector.prototype.getExcludedValues = function(index){
+    if(this.forSupposed){
+        return this.field.getCell(this.index).getSupposedValues();
     }
-    
-    clearSelection(){
-        this.selectedCellIndex = -1;
-    }
-
-    disable(){
-        this.disabled = true;
-    }
-
-    setValue(value){
-        if(!this.disabled && this.selectedCellIndex < 0)
-            throw new Error("Select cell first in order to put value");
-            this.field.setValue(this.selectedCellIndex, value, this.supposed);
-    }
-
-    getSelectedCell(){
-        if(this.selectedCellIndex < 0)
-            return null;
-        return this.field.getCell(this.selectedCellIndex);
-    }
-
-    isForSupposedValue(){
-        return this.supposed;
+    else{
+        return [this.field.getCell(this.index).getValue()]; 
     }
 }
 

@@ -1,3 +1,4 @@
+import EventEmitter from "../utils/emitter.js";
 import { hasWinCondition, allCellsFilled } from "./fieldMonitoring.js";
 import Generator from '../generator/generator.js'
 
@@ -13,77 +14,100 @@ const events = Object.freeze({
     WIN_CONDITION: 'winCondition'
 });
 
-class EventEmitter{
-    constructor(){
-        this.listeners = new Map();
-    }
-    emit(event){
-        if(this.listeners.has(event.eventName)){
-            for(const fn of this.listeners.get(event.eventName) ){
-                fn(event);
-            }
-        }
-    }
-    subscribe(eventName, fn){
-        if(!this.listeners.has(eventName)){
-            this.listeners.set(eventName, new Set());
-        }
-        this.listeners.get(eventName).add(fn);
-    }
-    unSubscribe(eventName, fn){
-        if(this.listeners.has(eventName)){
-            const fns = this.listeners.get(eventName);
-            fns.delete(fn);
-        }
-    }
+function Emitting(emitter) {
+    this.emitter = emitter;
 }
 
-function startGameSubscriber(emitter){
-    function valueSetSubscriber(emitter, field){
-        return function({data: {index, value, supposed, ...rest}}){
-            //console.trace('ValueSetSubscriber subscriber triggered');
-            field.setValue(index, value, supposed);
-            emitter.emit({eventName: events.FIELD_UPDATED, data: {field}});
-        }
-    }
-    
-    function winCheckSubscriber(emitter, field){
-        return function(){
-            //console.trace('WinCheckSubscriber subscriber triggered');
-            if(allCellsFilled(field.getValuesFlat()) && hasWinCondition(field.getValuesFlat())){
-                emitter.emit({eventName: events.WIN_CONDITION});
-                emitter.emit({eventName: events.GAME_ENDED});
-            }
-        }
-    }
-
-    function cellSelectSubscriber(emitter, field){
-        return function({data: {index, ...rest}}){
-            //console.trace('cellSelectSubscriber triggered');
-            emitter.emit({eventName: events.CELL_SELECTED, data: {cell: field.getCell(index), ...rest}})
-        }
-    }
-
-    return function({data: {startCellsNum, ...rest}}){
-        //console.trace('StartGameSubscriber triggered');
-        const generator = new Generator();
-        const field = generator.createFieldOfNumberOfCells(startCellsNum);
-
-        const winCheckSubscriberFn = winCheckSubscriber(emitter, field);
-        const valueSetSubscriberFn = valueSetSubscriber(emitter, field);
-        const cellSelectSubscriberFn =  cellSelectSubscriber(emitter, field);
-
-        emitter.subscribe(events.VALUE_SET, valueSetSubscriberFn);
-        emitter.subscribe(events.VALUE_SET, winCheckSubscriberFn);
-        emitter.subscribe(events.CELL_SELECT, cellSelectSubscriberFn);
-        emitter.subscribe(events.GAME_ENDED, function dispose(){
-            emitter.unSubscribe(events.VALUE_SET, winCheckSubscriberFn);
-            emitter.unSubscribe(events.VALUE_SET, valueSetSubscriberFn);
-            emitter.unSubscribe(events.CELL_SELECT, cellSelectSubscriberFn);
-            emitter.unSubscribe(events.WIN_CONDITION, dispose);
-        });
-        emitter.emit({eventName: events.FIELD_UPDATED, data: {field}})
-    }
+Emitting.prototype.emit = function (evenName, data) {
+    this.emitter.emit( evenName, data );
 }
 
-export {EventEmitter, events, startGameSubscriber};
+Emitting.prototype.subscribe = function (evenName, fn) {
+    this.emitter.subscribe(evenName, fn);
+}
+
+Emitting.prototype.unSubscribe = function (evenName, fn) {
+    this.emitter.unSubscribe(evenName, fn);
+}
+
+// Game lifecycle management tool
+function GameLifecycle() {
+    const emitter = new EventEmitter()
+    Emitting.call(this, emitter);
+}
+
+Object.setPrototypeOf(GameLifecycle.prototype, Emitting.prototype);
+
+GameLifecycle.prototype.startNew = function (startCellsNum) {
+    const generator = new Generator();
+    const field = generator.createFieldOfNumberOfCells(startCellsNum);
+    this.field = new EmittingField(field, this.emitter);
+    this.emit(events.GAME_START);
+    this.emit(events.FIELD_UPDATED, {field});
+}
+
+GameLifecycle.prototype.restart = function () {
+
+}
+
+GameLifecycle.prototype.pause = function () {
+    // Lock field and emit pause
+}
+
+GameLifecycle.prototype.isGameInProgress = function () {
+    return false;
+}
+
+GameLifecycle.prototype.getField = function () {
+    return this.field;
+}
+
+GameLifecycle.prototype.end = function () {
+    this.emit(events.GAME_ENDED);
+}
+
+// Field wrapper that emits certain events
+function EmittingField(field, emitter) {
+    if (!field || !emitter) {
+        throw new Error('Field and emitter must set for emitting field');
+    }
+    Emitting.call(this, emitter);
+    this.field = field;
+    this.locked = false;
+}
+
+Object.setPrototypeOf(EmittingField.prototype, Emitting.prototype);
+
+EmittingField.prototype.setValue = function (index, value, supposed) {
+    if (!this.field)
+        throw new Error('No field set for emitting field wrapper');
+    if(this.locked){
+        throw new Error('Field is locked. Unable to set value');
+    }
+    this.field.setValue(index, value, supposed);
+    if (allCellsFilled(this.field.getValuesFlat()) && hasWinCondition(this.field.getValuesFlat())) {
+        this.lock();
+        this.emit(events.WIN_CONDITION);
+        this.emit(events.GAME_ENDED);
+    }
+    else {
+        this.emit(events.VALUE_SET, {});
+    }
+    this.emit(events.FIELD_UPDATED, { field: this.field });
+}
+
+EmittingField.prototype.getCell = function (index) {
+    if (!this.field)
+        throw new Error('No field set for emitting field wrapper');
+    return this.field.getCell(index);
+}
+
+EmittingField.prototype.lock = function () {
+    this.locked = true;
+}
+
+EmittingField.prototype.unlock = function () {
+    this.locked = false;
+}
+
+export { GameLifecycle, events};
