@@ -1,9 +1,20 @@
 import getDifficulty from "./src/main/game/difficulty-range.js";
 import { events, GameLifecycle } from "./src/main/game/gameLifeCycle.js";
 import Selector from "./src/main/game/selector.js";
-import { getFieldUI, getSelectorUI } from "./src/main/ui/render.js";
+import { getFieldUI, getSelectorUI, getTimerUI } from "./src/main/ui/render.js";
+import Timer from './src/main/game/timer.js'
 
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', function () {
+    const fieldElement = document.getElementById('sudoku-grid');
+    const selectorElement = document.getElementById('numberSelector');
+    const timerDisplayElement = document.getElementById('timerDisplay');
+    const winConditionModalElement = document.getElementById('winConditionModal');
+    const pauseButtonElement = document.getElementById('pauseGameButton');
+
+    document.getElementById('gameForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+    });
+
     function prepareField() {
         const quadrantElements = [];
         for (let q = 0; q < 9; q++) {
@@ -26,20 +37,18 @@ document.addEventListener('DOMContentLoaded', function(){
             quadrantElements[Math.floor(i / 27) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
         }
     }
-    const fieldElement = document.getElementById('sudoku-grid');
-    const selectorElement = document.getElementById('numberSelector');
-    const winConditionModalElement = document.getElementById('winConditionModal');
 
-    const {render : renderField, clear: clearField } = getFieldUI(fieldElement);
-    let {render: showSelector, hide: hideSelector} = getSelectorUI(selectorElement);
-    let selector;
+    prepareField();
+
+    const { render: renderField, clear: clearField } = getFieldUI(fieldElement);
+    let { render: showSelector, hide: hideSelector } = getSelectorUI(selectorElement);
+    let { render: renderTimer, zero: clearTimer } = getTimerUI(timerDisplayElement);
     const gameLifeCycle = new GameLifecycle();
-    let fieldObj = null;
-    let [cellSelected, supposedFlag ] = [-1, false];
+    let selector;
+    let fieldObj;
+    let timerObj;
 
-    prepareField();    
-
-    document.getElementById('difficultyRange').addEventListener('input', function(event){
+    document.getElementById('difficultyRange').addEventListener('input', function (event) {
         const difficulty = getDifficulty(this.value);
         const difficultyLabelElement = document.getElementById('difficultyLabel');
         difficultyLabelElement.innerHTML = difficulty.label;
@@ -50,86 +59,107 @@ document.addEventListener('DOMContentLoaded', function(){
         document.getElementById('difficultyRangeValue').innerHTML = this.value;
     })
 
-    document.getElementById('startNewGameButton').addEventListener('click', function(event){
-        //emitter.emit({eventName: events.GAME_ENDED});
-        if(gameLifeCycle.isGameInProgress){
+    document.getElementById('startNewGameButton').addEventListener('click', function (event) {
+        if (gameLifeCycle.isGameInProgress()) {
             gameLifeCycle.end();
-        }
-        function renderFieldSubscriber(eventName, {field}){
-            //console.trace('ValueSetSubscriber subscriber triggered');
-            renderField(field);
-        }
-
-        function winConditionModalSubscriber(){
-            //console.trace('winConditionModalSubscriber triggered');
-            winConditionModalElement.style.display = 'block';
         }
 
         const startCellsNum = document.getElementById('difficultyRange').value;
-
-        gameLifeCycle.subscribe(events.FIELD_UPDATED, renderFieldSubscriber);
-        gameLifeCycle.subscribe(events.WIN_CONDITION, winConditionModalSubscriber);
-        gameLifeCycle.subscribe(events.GAME_ENDED, function dispose(){
-            gameLifeCycle.unSubscribe(events.WIN_CONDITION, winConditionModalSubscriber);
+        gameLifeCycle.init(startCellsNum);
+        ([fieldObj, timerObj] = [gameLifeCycle.getField(), new Timer()]);
+        let timerPollInterval;
+        const updateSub = () => { renderField(fieldObj); }
+        const winSub = () => { winConditionModalElement.style.display = 'block'; }
+        const startSub = () => {
+            timerObj.start();
+            timerPollInterval = setInterval(() => renderTimer(timerObj), 80);
+        };
+        const pauseSub = () => { timerObj.pause(); }
+        const unpauseSub = () => { timerObj.unpause(); }
+        const endSub = () => {
+            if (timerPollInterval) {
+                clearInterval(timerPollInterval);
+                timerPollInterval = null;
+            }
+            timerObj.stop();
+            timerObj = null;
+            gameLifeCycle.unSubscribe(events.FIELD_UPDATED, updateSub);
+            gameLifeCycle.unSubscribe(events.WIN_CONDITION, winSub);
             gameLifeCycle.unSubscribe(events.GAME_ENDED, dispose);
-            hideSelector();
-        });
-        gameLifeCycle.startNew(startCellsNum);
-        fieldObj = gameLifeCycle.getField();
+        }
+
+        gameLifeCycle.subscribe(events.FIELD_UPDATED, updateSub);
+        gameLifeCycle.subscribe(events.WIN_CONDITION, winSub);
+        gameLifeCycle.subscribe(events.GAME_START, startSub);
+        gameLifeCycle.subscribe(events.GAME_PAUSE, pauseSub);
+        gameLifeCycle.subscribe(events.GAME_UNPAUSE, unpauseSub);
+        gameLifeCycle.subscribe(events.GAME_ENDED, endSub);
+
+        gameLifeCycle.start();
     });
-    
-    document.getElementById('restartGameButton').addEventListener('click', function(event){
+
+    document.getElementById('restartGameButton').addEventListener('click', function (event) {
         //emitter.emit({ eventName: events.GAME_RESTART, data: {startCellsNum}});
     });
 
-    winConditionModalElement
-        .querySelector('.fa-window-close')
-            .addEventListener('click', function (){
-                winConditionModalElement.style.display = 'none';
-        });
-
-    selectorElement
-        .querySelector('.fa-window-close')
-        .addEventListener('click', function (){
-            hideSelector();
+    pauseButtonElement.addEventListener('click', function (event) {
+        if (!timerObj) {
+            console.error('Timer is not running');
+            return;
+        }
+        if (pauseButtonElement.value === 'Pause') {
+            timerObj.pause();
+            pauseButtonElement.value = 'Unpause';
+            pauseButtonElement.innerHTML = '<span class="buttonText">Unpause</span>'
+        }
+        else {
+            timerObj.unpause();
+            pauseButtonElement.value = 'Pause';
+            pauseButtonElement.innerHTML = '<span class="buttonText">Pause</span>';
+        }
     });
-    
+
+    winConditionModalElement.querySelector('.fa-window-close').addEventListener('click', function () {
+        winConditionModalElement.style.display = 'none';
+    });
+
+    selectorElement.querySelector('.fa-window-close').addEventListener('click', function () {
+        selector = null;
+        hideSelector();
+    });
+
     // Click on field cell event fires CELL_SELECT event
     fieldElement.querySelectorAll('.cell')
         .forEach(e => e.addEventListener('click', function (event) {
-            if(!fieldObj){
+            if (!fieldObj) {
                 throw new Error("Create field first in order to use selector");
             }
-            if(selector){
-                if(selector.index === Number(e.dataset.index) && selector.forSupposed === Boolean(event.ctrlKey)){
+            if (selector) {
+                if (selector.index === Number(e.dataset.index) && selector.forSupposed === Boolean(event.ctrlKey)) {
                     selector = null;
                     hideSelector();
                 }
-                else{
+                else {
                     hideSelector();
-                    selector = new Selector(fieldObj, Number(e.dataset.index), Boolean(event.ctrlKey));
-                    showSelector(selector, {x: event.x, y: event.y});
+                    selector = new Selector(fieldObj, Number(event.target.dataset.index), Boolean(event.ctrlKey));
+                    showSelector(selector, { x: event.x, y: event.y });
                 }
             }
-            else{
-                selector = new Selector(fieldObj, Number(e.dataset.index), Boolean(event.ctrlKey));
-                showSelector(selector, {x: event.x, y: event.y});
+            else {
+                selector = new Selector(fieldObj, Number(event.target.dataset.index), Boolean(event.ctrlKey));
+                showSelector(selector, { x: event.x, y: event.y });
             }
-    }));
+        }));
 
     // Click on selector's cell event fires VALUE_SET event
     selectorElement.querySelectorAll('.cell').forEach((e, i) => {
         e.addEventListener('click', function (event) {
-            if(selector){
+            if (selector) {
                 selector.setValue(Number(event.target.dataset.number));
                 showSelector(selector, {})
             }
         });
     });
-
-    document.getElementById('gameForm').addEventListener('submit', function(event){
-        event.preventDefault();
-    })
 
 });
 

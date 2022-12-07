@@ -1,9 +1,12 @@
 import EventEmitter from "../utils/emitter.js";
 import { hasWinCondition, allCellsFilled } from "./fieldMonitoring.js";
-import Generator from '../generator/generator.js'
+import Generator from '../generator/generator.js';
+import Field from "../field/field.js";
 
 const events = Object.freeze({
     GAME_START: 'gameStart',
+    GAME_PAUSE: 'gamePause',
+    GAME_UNPAUSE: 'gameUnpause',
     GAME_RESTART: 'gameRestart',
     GAME_ENDED: 'gameEnded',
     VALUE_SET: 'valueSet',
@@ -19,7 +22,7 @@ function Emitting(emitter) {
 }
 
 Emitting.prototype.emit = function (evenName, data) {
-    this.emitter.emit( evenName, data );
+    this.emitter.emit(evenName, data);
 }
 
 Emitting.prototype.subscribe = function (evenName, fn) {
@@ -32,18 +35,22 @@ Emitting.prototype.unSubscribe = function (evenName, fn) {
 
 // Game lifecycle management tool
 function GameLifecycle() {
-    const emitter = new EventEmitter()
-    Emitting.call(this, emitter);
+    Emitting.call(this, new EventEmitter());
 }
 
-Object.setPrototypeOf(GameLifecycle.prototype, Emitting.prototype);
+GameLifecycle.prototype.emit = Emitting.prototype.emit;
+GameLifecycle.prototype.subscribe = Emitting.prototype.subscribe;
+GameLifecycle.prototype.unSubscribe = Emitting.prototype.unSubscribe;
 
-GameLifecycle.prototype.startNew = function (startCellsNum) {
+GameLifecycle.prototype.init = function (startCellsNum) {
     const generator = new Generator();
     const field = generator.createFieldOfNumberOfCells(startCellsNum);
     this.field = new EmittingField(field, this.emitter);
+}
+
+GameLifecycle.prototype.start = function () {
     this.emit(events.GAME_START);
-    this.emit(events.FIELD_UPDATED, {field});
+    this.emit(events.FIELD_UPDATED, { field: this.field });
 }
 
 GameLifecycle.prototype.restart = function () {
@@ -66,6 +73,10 @@ GameLifecycle.prototype.end = function () {
     this.emit(events.GAME_ENDED);
 }
 
+GameLifecycle.prototype.createHistoryRecord = function () {
+    console.log('Should persist game difficulty, result and time when game ends');
+}
+
 // Field wrapper that emits certain events
 function EmittingField(field, emitter) {
     if (!field || !emitter) {
@@ -76,12 +87,15 @@ function EmittingField(field, emitter) {
     this.locked = false;
 }
 
-Object.setPrototypeOf(EmittingField.prototype, Emitting.prototype);
+Object.setPrototypeOf(EmittingField.prototype, Field.prototype);
+EmittingField.prototype.emit = Emitting.prototype.emit;
+EmittingField.prototype.subscribe = Emitting.prototype.subscribe;
+EmittingField.prototype.unSubscribe = Emitting.prototype.unSubscribe;
 
 EmittingField.prototype.setValue = function (index, value, supposed) {
     if (!this.field)
         throw new Error('No field set for emitting field wrapper');
-    if(this.locked){
+    if (this.locked) {
         throw new Error('Field is locked. Unable to set value');
     }
     this.field.setValue(index, value, supposed);
@@ -110,4 +124,8 @@ EmittingField.prototype.unlock = function () {
     this.locked = false;
 }
 
-export { GameLifecycle, events};
+EmittingField.prototype[Symbol.iterator] = function () {
+    return this.field[Symbol.iterator]();
+}
+
+export { GameLifecycle, events };
