@@ -67,25 +67,23 @@ document.addEventListener('DOMContentLoaded', function () {
         const startCellsNum = document.getElementById('difficultyRange').value;
         gameLifeCycle.init(startCellsNum);
         ([fieldObj, timerObj] = [gameLifeCycle.getField(), new Timer()]);
-        let timerPollInterval;
         const updateSub = () => { renderField(fieldObj); }
         const winSub = () => { winConditionModalElement.style.display = 'block'; }
         const startSub = () => {
             timerObj.start();
-            timerPollInterval = setInterval(() => renderTimer(timerObj), 80);
+            timerObj.attachedInterval = setInterval(() => renderTimer(timerObj), 80);
         };
         const pauseSub = () => { timerObj.pause(); }
         const unpauseSub = () => { timerObj.unpause(); }
         const endSub = () => {
-            if (timerPollInterval) {
-                clearInterval(timerPollInterval);
-                timerPollInterval = null;
-            }
-            timerObj.stop();
+            stopTimer(timerObj);
             timerObj = null;
             gameLifeCycle.unSubscribe(events.FIELD_UPDATED, updateSub);
             gameLifeCycle.unSubscribe(events.WIN_CONDITION, winSub);
-            gameLifeCycle.unSubscribe(events.GAME_ENDED, dispose);
+            gameLifeCycle.unSubscribe(events.GAME_START, startSub);
+            gameLifeCycle.unSubscribe(events.GAME_PAUSE, pauseSub);
+            gameLifeCycle.unSubscribe(events.GAME_UNPAUSE, unpauseSub);
+            gameLifeCycle.unSubscribe(events.GAME_ENDED, endSub);
         }
 
         gameLifeCycle.subscribe(events.FIELD_UPDATED, updateSub);
@@ -163,4 +161,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+
+function stopTimer(timer) {
+    console.log('Stopping imer');
+    if (timer) {
+        timer.stop();
+        if(timer.attachedInterval)
+            clearInterval(timer.attachedInterval);
+    }
+}
 

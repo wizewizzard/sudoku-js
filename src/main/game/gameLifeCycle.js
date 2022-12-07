@@ -49,6 +49,7 @@ GameLifecycle.prototype.init = function (startCellsNum) {
 }
 
 GameLifecycle.prototype.start = function () {
+    this.isGameInProgressFlag = true;
     this.emit(events.GAME_START);
     this.emit(events.FIELD_UPDATED, { field: this.field });
 }
@@ -62,7 +63,7 @@ GameLifecycle.prototype.pause = function () {
 }
 
 GameLifecycle.prototype.isGameInProgress = function () {
-    return false;
+    return this.isGameInProgressFlag;
 }
 
 GameLifecycle.prototype.getField = function () {
