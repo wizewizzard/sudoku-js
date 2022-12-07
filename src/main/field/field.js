@@ -38,7 +38,6 @@ class Field{
                     return v === null; 
                 }
             }});
-        console.debug("Field initialized: ", this.currentField);
     }
 
     [Symbol.iterator](){
