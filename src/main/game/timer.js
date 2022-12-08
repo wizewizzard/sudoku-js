@@ -49,17 +49,6 @@ function Timer() {
             return pausedAt - startedAt;
         }
     }
-
-    this.asHMSMs = function () {
-        let intermedValue = this.getTime();
-        const ms = intermedValue % 1000;
-        intermedValue = Math.round((intermedValue - ms) / 1000);
-        const s = intermedValue % 60;
-        intermedValue = Math.round((intermedValue - s) / 60);
-        const m = Math.round(intermedValue % 60);
-        const h = Math.round((intermedValue - m) / 60);
-        return { h, m, s, ms };
-    }
 }
 
 export default Timer;
