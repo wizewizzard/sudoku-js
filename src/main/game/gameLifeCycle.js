@@ -2,6 +2,7 @@ import EventEmitter from "../utils/emitter.js";
 import { hasWinCondition, allCellsFilled } from "./fieldMonitoring.js";
 import Generator from '../generator/generator.js';
 import Field from "../field/field.js";
+import Timer from "./timer.js";
 
 const events = Object.freeze({
     GAME_START: 'gameStart',
@@ -36,47 +37,62 @@ Emitting.prototype.unSubscribe = function (evenName, fn) {
 // Game lifecycle management tool
 function GameLifecycle() {
     Emitting.call(this, new EventEmitter());
+    const timer = new Timer();
+    let field;
+    let isGameInProgressFlag;
+
+    this.createField = function (startCellsNum) {
+        const generator = new Generator();
+        field = new EmittingField(generator.createFieldOfNumberOfCells(startCellsNum), this.emitter);
+    }
+
+    this.pause = function () {
+        field.lock();
+        timer.pause();
+    }
+
+    this.unpause = function () {
+        field.unlock();
+        timer.unpause();
+    }
+
+    this.start = function () {
+        isGameInProgressFlag = true;
+        timer.start();
+        this.emit(events.GAME_START);
+        this.emit(events.FIELD_UPDATED);
+    }
+
+    this.restart = function () {
+        throw new Error('Not implemented');
+    }
+
+    this.end = function () {
+        timer.stop();
+        this.emit(events.GAME_ENDED);
+    }
+
+    this.getField = function () {
+        return field;
+    }
+
+    this.isGameInProgress = function () {
+        return isGameInProgressFlag;
+    }
+
+    this.getTime = function() {
+        return timer.getTime();
+    }
+
+    this.createHistoryRecord = function () {
+        console.log('Should persist game difficulty, result and time when game ends');
+        throw new Error('Not implemented yet')
+    }
 }
 
 GameLifecycle.prototype.emit = Emitting.prototype.emit;
 GameLifecycle.prototype.subscribe = Emitting.prototype.subscribe;
 GameLifecycle.prototype.unSubscribe = Emitting.prototype.unSubscribe;
-
-GameLifecycle.prototype.init = function (startCellsNum) {
-    const generator = new Generator();
-    const field = generator.createFieldOfNumberOfCells(startCellsNum);
-    this.field = new EmittingField(field, this.emitter);
-}
-
-GameLifecycle.prototype.start = function () {
-    this.isGameInProgressFlag = true;
-    this.emit(events.GAME_START);
-    this.emit(events.FIELD_UPDATED, { field: this.field });
-}
-
-GameLifecycle.prototype.restart = function () {
-
-}
-
-GameLifecycle.prototype.pause = function () {
-    // Lock field and emit pause
-}
-
-GameLifecycle.prototype.isGameInProgress = function () {
-    return this.isGameInProgressFlag;
-}
-
-GameLifecycle.prototype.getField = function () {
-    return this.field;
-}
-
-GameLifecycle.prototype.end = function () {
-    this.emit(events.GAME_ENDED);
-}
-
-GameLifecycle.prototype.createHistoryRecord = function () {
-    console.log('Should persist game difficulty, result and time when game ends');
-}
 
 // Field wrapper that emits certain events
 function EmittingField(field, emitter) {

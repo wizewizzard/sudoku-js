@@ -1,8 +1,7 @@
 import getDifficulty from "./src/main/game/difficulty-range.js";
 import { events, GameLifecycle } from "./src/main/game/gameLifeCycle.js";
 import Selector from "./src/main/game/selector.js";
-import { getFieldUI, getSelectorUI, getTimerUI, formatTimer } from "./src/main/ui/render.js";
-import Timer from './src/main/game/timer.js'
+import { getFieldUI, getSelectorUI, getTimerUI, formatMsForTimer } from "./src/main/ui/render.js";
 
 document.addEventListener('DOMContentLoaded', function () {
     const fieldElement = document.getElementById('sudoku-grid');
@@ -47,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const gameLifeCycle = new GameLifecycle();
     let selector;
     let fieldObj;
-    let timerObj;
+    let timerPollInterval;
 
     document.getElementById('difficultyRange').addEventListener('input', function (event) {
         const difficulty = getDifficulty(this.value);
@@ -70,36 +69,29 @@ document.addEventListener('DOMContentLoaded', function () {
         hideSelector();
 
         const startCellsNum = document.getElementById('difficultyRange').value;
-        gameLifeCycle.init(startCellsNum);
-        ([fieldObj, timerObj] = [gameLifeCycle.getField(), new Timer()]);
+        gameLifeCycle.createField(startCellsNum);
+        fieldObj = gameLifeCycle.getField();
         const updateSub = () => { renderField(fieldObj); }
         const winSub = () => { 
-            timerResultElement.textContent = formatTimer(timerObj.asHMSMs());
+            timerResultElement.textContent = formatMsForTimer(gameLifeCycle.getTime());
             winConditionModalElement.style.display = 'block'; 
         }
         const startSub = () => {
-            timerObj.start();
-            timerObj.attachedInterval = setInterval(() => renderTimer(timerObj), 80);
+            timerPollInterval = setInterval(() => renderTimer(gameLifeCycle.getTime()), 80);
         };
-        const pauseSub = () => { timerObj.pause(); }
-        const unpauseSub = () => { timerObj.unpause(); }
         const endSub = () => {
             hideSelector();
-            stopTimer(timerObj);
-            timerObj = null;
+            if(timerPollInterval)
+                clearInterval(timerPollInterval);
             gameLifeCycle.unSubscribe(events.FIELD_UPDATED, updateSub);
             gameLifeCycle.unSubscribe(events.WIN_CONDITION, winSub);
             gameLifeCycle.unSubscribe(events.GAME_START, startSub);
-            gameLifeCycle.unSubscribe(events.GAME_PAUSE, pauseSub);
-            gameLifeCycle.unSubscribe(events.GAME_UNPAUSE, unpauseSub);
             gameLifeCycle.unSubscribe(events.GAME_ENDED, endSub);
         }
 
         gameLifeCycle.subscribe(events.FIELD_UPDATED, updateSub);
         gameLifeCycle.subscribe(events.WIN_CONDITION, winSub);
         gameLifeCycle.subscribe(events.GAME_START, startSub);
-        gameLifeCycle.subscribe(events.GAME_PAUSE, pauseSub);
-        gameLifeCycle.subscribe(events.GAME_UNPAUSE, unpauseSub);
         gameLifeCycle.subscribe(events.GAME_ENDED, endSub);
 
         gameLifeCycle.start();
@@ -110,17 +102,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     pauseButtonElement.addEventListener('click', function (event) {
-        if (!timerObj) {
-            console.error('Timer is not running');
+        if (!gameLifeCycle.isGameInProgress) {
+            console.error('Game is not running');
             return;
         }
         if (pauseButtonElement.value === 'Pause') {
-            timerObj.pause();
+            gameLifeCycle.pause();
             pauseButtonElement.value = 'Unpause';
             pauseButtonElement.innerHTML = '<span class="buttonText">Unpause</span>'
         }
         else {
-            timerObj.unpause();
+            gameLifeCycle.unpause();
             pauseButtonElement.value = 'Pause';
             pauseButtonElement.innerHTML = '<span class="buttonText">Pause</span>';
         }
@@ -169,12 +161,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
-
-function stopTimer(timer) {
-    if (timer) {
-        timer.stop();
-        if(timer.attachedInterval)
-            clearInterval(timer.attachedInterval);
-    }
-}
 
