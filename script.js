@@ -1,7 +1,7 @@
 import getDifficulty from "./src/main/game/difficulty-range.js";
 import { events, GameLifecycle } from "./src/main/game/gameLifeCycle.js";
 import Selector from "./src/main/game/selector.js";
-import { getFieldUI, getSelectorUI, getTimerUI } from "./src/main/ui/render.js";
+import { getFieldUI, getSelectorUI, getTimerUI, formatTimer } from "./src/main/ui/render.js";
 import Timer from './src/main/game/timer.js'
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const timerDisplayElement = document.getElementById('timerDisplay');
     const winConditionModalElement = document.getElementById('winConditionModal');
     const pauseButtonElement = document.getElementById('pauseGameButton');
+    const timerResultElement = document.getElementById('timeResult');
 
     document.getElementById('gameForm').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -63,12 +64,19 @@ document.addEventListener('DOMContentLoaded', function () {
         if (gameLifeCycle.isGameInProgress()) {
             gameLifeCycle.end();
         }
+        selector = null;
+        clearTimer();
+        clearField();
+        hideSelector();
 
         const startCellsNum = document.getElementById('difficultyRange').value;
         gameLifeCycle.init(startCellsNum);
         ([fieldObj, timerObj] = [gameLifeCycle.getField(), new Timer()]);
         const updateSub = () => { renderField(fieldObj); }
-        const winSub = () => { winConditionModalElement.style.display = 'block'; }
+        const winSub = () => { 
+            timerResultElement.textContent = formatTimer(timerObj.asHMSMs());
+            winConditionModalElement.style.display = 'block'; 
+        }
         const startSub = () => {
             timerObj.start();
             timerObj.attachedInterval = setInterval(() => renderTimer(timerObj), 80);
@@ -76,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const pauseSub = () => { timerObj.pause(); }
         const unpauseSub = () => { timerObj.unpause(); }
         const endSub = () => {
+            hideSelector();
             stopTimer(timerObj);
             timerObj = null;
             gameLifeCycle.unSubscribe(events.FIELD_UPDATED, updateSub);
@@ -161,9 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-
 function stopTimer(timer) {
-    console.log('Stopping imer');
     if (timer) {
         timer.stop();
         if(timer.attachedInterval)

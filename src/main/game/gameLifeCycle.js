@@ -100,6 +100,7 @@ EmittingField.prototype.setValue = function (index, value, supposed) {
         throw new Error('Field is locked. Unable to set value');
     }
     this.field.setValue(index, value, supposed);
+    this.emit(events.FIELD_UPDATED, { field: this.field });
     if (allCellsFilled(this.field.getValuesFlat()) && hasWinCondition(this.field.getValuesFlat())) {
         this.lock();
         this.emit(events.WIN_CONDITION);
@@ -108,7 +109,6 @@ EmittingField.prototype.setValue = function (index, value, supposed) {
     else {
         this.emit(events.VALUE_SET, {});
     }
-    this.emit(events.FIELD_UPDATED, { field: this.field });
 }
 
 EmittingField.prototype.getCell = function (index) {
