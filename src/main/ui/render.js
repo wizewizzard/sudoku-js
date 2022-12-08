@@ -70,28 +70,20 @@ function getSelectorUI(selectorElement) {
 function getTimerUI(timerElement) {
     return {
         render(timer) {
-            const { h, m, s, ms } = timerDisplayFormat(timer.getTime());
-            timerElement.textContent = `${digitPadding(h)}:${digitPadding(m)}:${digitPadding(s)}`;
+            timerElement.textContent = formatTimer(timer.asHMSMs());
         },
         zero() {
-            timerElement.textContent = 0;
+            timerElement.textContent = '00:00:00';
         }
     }
+}
+
+function formatTimer({ h, m, s}){
+    return `${digitPadding(h)}:${digitPadding(m)}:${digitPadding(s)}`;
 }
 
 function digitPadding(n, z = 2) {
     return ('00' + n).slice(-z);
 }
 
-function timerDisplayFormat(millis) {
-    let intermedValue = millis;
-    const ms = intermedValue % 1000;
-    intermedValue = Math.round((intermedValue - ms) / 1000);
-    const s = intermedValue % 60;
-    intermedValue = Math.round((intermedValue - s) / 60);
-    const m = Math.round(intermedValue % 60);
-    const h = Math.round((intermedValue - m) / 60);
-    return { h, m, s, ms };
-}
-
-export { getFieldUI, getSelectorUI, getTimerUI };
+export { getFieldUI, getSelectorUI, getTimerUI, formatTimer };
