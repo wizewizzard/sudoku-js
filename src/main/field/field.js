@@ -1,5 +1,5 @@
 import { constants } from "../utils/constants.js";
-import { getColumn, getQuadrant, getRow, getRepeats, hasRepeats } from "../utils/utils.js";
+import { getColumn, getQuadrant, getRow, hasRepeats } from "../utils/utils.js";
 const {FIELD_SIZE, COLUMNS_NUM, ROWS_NUM, QUADRANTS_NUM} = constants;
 
 class Field{
@@ -82,6 +82,39 @@ class Field{
 
     getValuesFlat(){
         return this.currentField.map(cell => cell.getValue());
+    }
+
+    isConsistent(){
+        const field = this.getValuesFlat();
+        for( let i = 0; i < ROWS_NUM; i++){
+            if(hasRepeats(getRow(field, i)))
+                return false;
+        }
+        for( let i = 0; i < COLUMNS_NUM; i++){
+            if(hasRepeats(getColumn(field, i)))
+                return false;
+        }
+        for( let i = 0; i < QUADRANTS_NUM; i++){
+            if(hasRepeats(getQuadrant(field, i))){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    isFilled(){
+        const field = this.getValuesFlat();
+        let i = 0;
+        for(const cellValue of field){
+            i++;
+            if(cellValue === null) 
+                return false;
+        }
+        return i === FIELD_SIZE;
+    }
+
+    hasWinCondition() {
+        return this.isFilled() && this.isConsistent();
     }
 }
 

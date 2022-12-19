@@ -1,5 +1,4 @@
 import Field from "../../main/field/field.js";
-import { isConsistent,  hasWinCondition} from "../../main/game/fieldMonitoring.js";
 import chai from 'chai';
 
 const fieldArrayConsistent = [
@@ -30,38 +29,38 @@ describe("Field", function() {
 
     it("Should not find any repeats and inconsistency", function() {
         const field = new Field(fieldArrayConsistent);
-        chai.assert.isTrue(isConsistent(field.getValuesFlat()));
+        chai.assert.isTrue(field.isConsistent());
     });
 
     it("Should report that field is not consistent because of repeats in row 0, column 4", function() {
         const field = new Field(fieldArrayInconsistent);
-        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
+        chai.assert.isFalse(field.isConsistent());
     });
 
     it("Empty field should not have any repeats", function() {
         const field = new Field(new Array(81).fill(null));
-        chai.assert.isTrue(isConsistent(field.getValuesFlat()));
+        chai.assert.isTrue(field.isConsistent());
     });
 
     it("Empty field with two repeated values at the same row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(1, 1);
-        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
+        chai.assert.isFalse(field.isConsistent());
     });
 
     it("Empty field with two repeated values at the same column row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(9, 1);
-        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
+        chai.assert.isFalse(field.isConsistent());
     });
 
     it("Empty field with two repeated values at the same qudrannt row should register repeats", function() {
         const field = new Field(new Array(81).fill(null));
         field.setValue(0, 1);
         field.setValue(11, 1);
-        chai.assert.isFalse(isConsistent(field.getValuesFlat()));
+        chai.assert.isFalse(field.isConsistent());
     });
   
 });
@@ -95,12 +94,12 @@ describe("Win conditions", function(){
 
     it("Should return that field has win condition", function() {
         const field = new Field(fieldArrayHasWinCondition);
-        chai.assert.isTrue(hasWinCondition(field.getValuesFlat()));
+        chai.assert.isTrue(field.hasWinCondition());
     });
 
     it("Should return that field has win condition", function() {
         const field = new Field(fieldArrayHasNoWinCondition);
-        chai.assert.isFalse(hasWinCondition(field.getValuesFlat()));
+        chai.assert.isFalse(field.hasWinCondition());
     });
 });
 

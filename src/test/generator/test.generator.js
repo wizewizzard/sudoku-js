@@ -1,4 +1,4 @@
-import Generator, {generateConsitentFieldArray} from "../../main/generator/generator.js";
+import Generator from "../../main/generator/generator.js";
 import chai from 'chai';
 
 describe("Generator", function() {
@@ -6,7 +6,7 @@ describe("Generator", function() {
     const generator = new Generator();
 
     it("Generates field array", function() {
-        chai.assert.equal(generateConsitentFieldArray().length, 81);
+        chai.assert.equal(generator.generateConsitentFieldArray().length, 81);
     });
   
     it("Generates field object with 10 values", function() {
