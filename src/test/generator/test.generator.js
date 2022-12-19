@@ -1,4 +1,5 @@
 import Generator, {generateConsitentFieldArray} from "../../main/generator/generator.js";
+import chai from 'chai';
 
 describe("Generator", function() {
 

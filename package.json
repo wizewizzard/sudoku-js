@@ -1,0 +1,25 @@
+{
+  "name": "sudoku",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --reporter spec \"src/test/**/*.js\"",
+    "start": "echo Starting!"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wizewizzard/sudoku-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wizewizzard/sudoku-js/issues"
+  },
+  "homepage": "https://github.com/wizewizzard/sudoku-js#readme",
+  "dependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
+  }
+}

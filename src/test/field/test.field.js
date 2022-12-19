@@ -1,5 +1,6 @@
 import Field from "../../main/field/field.js";
 import { isConsistent,  hasWinCondition} from "../../main/game/fieldMonitoring.js";
+import chai from 'chai';
 
 const fieldArrayConsistent = [
     2, 1, null, 5, null, 3, null, 7, 8,

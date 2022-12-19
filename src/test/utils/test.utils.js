@@ -1,4 +1,5 @@
 import {getRow, getColumn, getQuadrant, getRepeats, hasRepeats, getRandomGeneratorFromArray}  from '../../main/utils/utils.js';
+import chai from 'chai';
 
 describe("Utils test", function(){
     const field = [
