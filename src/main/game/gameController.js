@@ -12,6 +12,16 @@ function GameController() {
     let timer;
     let isGameInProgress;
 
+    const winSub = () => { 
+        isGameInProgress = false;
+        emitter.emit(events.GAME_ENDED, {});
+        emitter.unSubscribe(events.WIN_CONDITION, winSub);
+    };
+    const endSub = () => { 
+        this.cleanUp();
+        emitter.unSubscribe(events.GAME_ENDED, endSub);
+    };
+
     this.start = function (startCellsNum) {
         if( isGameInProgress ) {
             emitter.emit(events.GAME_ENDED);
@@ -22,20 +32,10 @@ function GameController() {
         selector = new Selector(field);
         isGameInProgress = true;
         timer.start();
-        emitter.emit(events.GAME_START);
-        emitter.emit(events.FIELD_UPDATED, {field});
-        function winSub() { 
-            isGameInProgress = false;
-            emitter.emit(events.GAME_ENDED, {});
-            emitter.unSubscribe(events.WIN_CONDITION, winSub);
-        };
-        function endSub () { 
-            timer.stop();
-            emitter.unSubscribe(events.GAME_ENDED, endSub);
-        };
-
         emitter.subscribe(events.WIN_CONDITION, winSub);
         emitter.subscribe(events.GAME_ENDED, endSub);
+        emitter.emit(events.GAME_START);
+        emitter.emit(events.FIELD_UPDATED, {field});
         return { selector };
     }
 
@@ -43,17 +43,19 @@ function GameController() {
         throw new Error('Not implemented');
     }
 
-    this.end = function () {
+    this.cleanUp = function () {
         timer.stop();
         isGameInProgress = false;
-        emitter.emit(events.GAME_ENDED);
+        selector.disable();
     }
     this.pause = function () {
+        selector.disable();
         timer.pause();
         emitter.emit(events.GAME_PAUSE);
     }
 
     this.unpause = function () {
+        selector.enable();
         timer.unpause();
         emitter.emit(events.GAME_UNPAUSE);
     }

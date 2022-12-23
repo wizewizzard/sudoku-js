@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('startNewGameButton').addEventListener('click', function (event) {
         if (gameController.isGameInProgress === true) {
-            gameController.end();
+            gameController.cleanUp();
         }
 
         clearTimer();
@@ -135,7 +135,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     ([selectedCellIndex, supposedFlag] = [null, null])
                 }
                 else {
-                    log('Showing selector');
                     ([selectedCellIndex, supposedFlag] = [Number(e.dataset.index), Boolean(event.ctrlKey)]);
                     showSelector(selector, { index: selectedCellIndex, supposed: supposedFlag, x: event.x, y: event.y });
                 }
