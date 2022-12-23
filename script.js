@@ -1,4 +1,4 @@
-import getDifficulty from "./src/main/game/difficulty-range.js";
+import getDifficulty from "./src/main/game/difficultyRange.js";
 import { events, GameLifecycle } from "./src/main/game/gameLifeCycle.js";
 import Selector from "./src/main/game/selector.js";
 import { getFieldUI, getSelectorUI, getTimerUI, formatMsForTimer } from "./src/main/ui/render.js";
