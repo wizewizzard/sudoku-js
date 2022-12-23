@@ -10,7 +10,6 @@ function getDifficulty(value){
     if( value > 81 || value < 0)
         throw new Error('Invalid value given');
     return difficultyRanging.find(d => (d.from <= value && d.to >= value));
-    
 }
 
 export default getDifficulty;
