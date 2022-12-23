@@ -41,20 +41,19 @@ function getFieldUI(fieldElement) {
 
 function getSelectorUI(selectorElement) {
     return {
-        render(selector, { x, y }) {
+        render(selector, { x, y, index, supposed }) {
             if (!selector) {
                 console.error("No selector to render");
                 return;
             }
             selectorElement.querySelectorAll('.cell').forEach(element => {
-                if (selector.getExcludedValues().indexOf(Number(element.dataset.number)) != -1) {
+                if (selector.isSelected(index, Number(element.dataset.number), supposed)) {
                     element.classList.add('selected');
                 }
                 else {
                     element.classList.remove('selected');
                 }
             });
-
             if (x && y) {
                 selectorElement.style.left = x + "px";
                 selectorElement.style.top = y + "px";

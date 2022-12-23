@@ -1,21 +1,18 @@
-function Selector(field, index, forSupposed){
-    this.index = index;
+function Selector(field){
     this.field = field;
-    this.forSupposed = forSupposed;
-}
 
-Selector.prototype.setValue = function(value){
-    this.field.setValue(this.index, value, this.forSupposed)
-}
-
-Selector.prototype.getExcludedValues = function(index){
-    if(this.forSupposed){
-        return this.field.getCell(this.index).getSupposedValues();
+    this.setValue = function (index, value, supposed) {
+        this.field.setValue(index, value, supposed);
     }
-    else{
-        return [this.field.getCell(this.index).getValue()]; 
+
+    this.isSelected = function(index, value, supposed){
+        if(supposed){
+            return this.field.getCell(index).getSupposedValues().indexOf(value) !== -1;
+        }
+        else{
+            return this.field.getCell(index).getValue() === value; 
+        }
     }
 }
-
 
 export default Selector;

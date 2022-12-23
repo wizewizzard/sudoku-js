@@ -1,7 +1,11 @@
-import getDifficulty from "./src/main/game/difficulty-range.js";
-import { events, GameLifecycle } from "./src/main/game/gameLifeCycle.js";
-import Selector from "./src/main/game/selector.js";
+import getDifficulty from "./src/main/game/difficultyRange.js";
+import { events } from "./src/main/event/eventsList.js";
 import { getFieldUI, getSelectorUI, getTimerUI, formatMsForTimer } from "./src/main/ui/render.js";
+import emitter from "./src/main/event/emitter.js";
+import GameController from "./src/main/game/gameController.js";
+
+const log = console.log;
+const debug = console.debug;
 
 document.addEventListener('DOMContentLoaded', function () {
     const fieldElement = document.getElementById('sudoku-grid');
@@ -11,11 +15,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const pauseButtonElement = document.getElementById('pauseGameButton');
     const timerResultElement = document.getElementById('timeResult');
 
+    const gameController = new GameController();
+    let selector;
+    let timerPollInterval;
+    let selectedCellIndex, supposedFlag;
+
+    const updateSub = (_, {field}) => { renderField(field); }
+    const timerPollSub = () => { timerPollInterval = setInterval(() => renderTimer(gameController.getTime()), 80); };
+    const timerPollStopSub = () => {
+        if (timerPollInterval ) {
+            clearInterval(timerPollInterval);
+            timerPollInterval = null;
+        }
+    }
+    const winSub = () => {
+        timerResultElement.textContent = formatMsForTimer(gameController.getTime());
+        winConditionModalElement.style.display = 'block';
+    }
+    emitter.subscribe(events.FIELD_UPDATED, updateSub);
+    emitter.subscribe(events.GAME_START, timerPollSub);
+    emitter.subscribe(events.GAME_ENDED, timerPollStopSub);
+    emitter.subscribe(events.WIN_CONDITION, winSub);
+
     document.getElementById('gameForm').addEventListener('submit', function (event) {
         event.preventDefault();
     });
 
-    function prepareField() {
+    (function prepareField() {
         const quadrantElements = [];
         for (let q = 0; q < 9; q++) {
             const quadrant = document.createElement('div');
@@ -36,17 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
             cellElement.append(valueSpan);
             quadrantElements[Math.floor(i / 27) * 3 + Math.floor((i / 3) % 3)].append(cellElement);
         }
-    }
+    })();
 
-    prepareField();
-
-    const { render: renderField, clear: clearField } = getFieldUI(fieldElement);
+    let { render: renderField, clear: clearField } = getFieldUI(fieldElement);
     let { render: showSelector, hide: hideSelector } = getSelectorUI(selectorElement);
-    let { render: renderTimer, zero: clearTimer } = getTimerUI(timerDisplayElement);
-    const gameLifeCycle = new GameLifecycle();
-    let selector;
-    let fieldObj;
-    let timerPollInterval;
+    let { render: renderTimer, zero: clearTimer } = getTimerUI(timerDisplayElement);    
 
     document.getElementById('difficultyRange').addEventListener('input', function (event) {
         const difficulty = getDifficulty(this.value);
@@ -60,41 +80,22 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     document.getElementById('startNewGameButton').addEventListener('click', function (event) {
-        if (gameLifeCycle.isGameInProgress()) {
-            gameLifeCycle.end();
+        if (gameController.isGameInProgress === true) {
+            gameController.end();
         }
-        selector = null;
+
         clearTimer();
         clearField();
         hideSelector();
-
         const startCellsNum = document.getElementById('difficultyRange').value;
-        gameLifeCycle.createField(startCellsNum);
-        fieldObj = gameLifeCycle.getField();
-        const updateSub = () => { renderField(fieldObj); }
-        const winSub = () => { 
-            timerResultElement.textContent = formatMsForTimer(gameLifeCycle.getTime());
-            winConditionModalElement.style.display = 'block'; 
-        }
-        const startSub = () => {
-            timerPollInterval = setInterval(() => renderTimer(gameLifeCycle.getTime()), 80);
-        };
+        ({ selector } = gameController.start(startCellsNum));
+        
         const endSub = () => {
             hideSelector();
-            if(timerPollInterval)
-                clearInterval(timerPollInterval);
-            gameLifeCycle.unSubscribe(events.FIELD_UPDATED, updateSub);
-            gameLifeCycle.unSubscribe(events.WIN_CONDITION, winSub);
-            gameLifeCycle.unSubscribe(events.GAME_START, startSub);
-            gameLifeCycle.unSubscribe(events.GAME_ENDED, endSub);
+            emitter.unSubscribe(events.GAME_ENDED, endSub);
         }
 
-        gameLifeCycle.subscribe(events.FIELD_UPDATED, updateSub);
-        gameLifeCycle.subscribe(events.WIN_CONDITION, winSub);
-        gameLifeCycle.subscribe(events.GAME_START, startSub);
-        gameLifeCycle.subscribe(events.GAME_ENDED, endSub);
-
-        gameLifeCycle.start();
+        emitter.subscribe(events.GAME_ENDED, endSub);
     });
 
     document.getElementById('restartGameButton').addEventListener('click', function (event) {
@@ -102,17 +103,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     pauseButtonElement.addEventListener('click', function (event) {
-        if (!gameLifeCycle.isGameInProgress) {
+        if (!gameController.isGameInProgress) {
             console.error('Game is not running');
             return;
         }
         if (pauseButtonElement.value === 'Pause') {
-            gameLifeCycle.pause();
+            gameController.pause();
             pauseButtonElement.value = 'Unpause';
             pauseButtonElement.innerHTML = '<span class="buttonText">Unpause</span>'
         }
         else {
-            gameLifeCycle.unpause();
+            gameController.unpause();
             pauseButtonElement.value = 'Pause';
             pauseButtonElement.innerHTML = '<span class="buttonText">Pause</span>';
         }
@@ -123,42 +124,39 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     selectorElement.querySelector('.fa-window-close').addEventListener('click', function () {
-        selector = null;
         hideSelector();
     });
 
-    // Click on field cell event fires CELL_SELECT event
     fieldElement.querySelectorAll('.cell')
         .forEach(e => e.addEventListener('click', function (event) {
-            if (!fieldObj) {
-                throw new Error("Create field first in order to use selector");
-            }
             if (selector) {
-                if (selector.index === Number(e.dataset.index) && selector.forSupposed === Boolean(event.ctrlKey)) {
-                    selector = null;
+                if (selectedCellIndex === Number(e.dataset.index) && supposedFlag === Boolean(event.ctrlKey)) {
                     hideSelector();
+                    ([selectedCellIndex, supposedFlag] = [null, null])
                 }
                 else {
-                    hideSelector();
-                    selector = new Selector(fieldObj, Number(event.target.dataset.index), Boolean(event.ctrlKey));
-                    showSelector(selector, { x: event.x, y: event.y });
+                    log('Showing selector');
+                    ([selectedCellIndex, supposedFlag] = [Number(e.dataset.index), Boolean(event.ctrlKey)]);
+                    showSelector(selector, { index: selectedCellIndex, supposed: supposedFlag, x: event.x, y: event.y });
                 }
             }
             else {
-                selector = new Selector(fieldObj, Number(event.target.dataset.index), Boolean(event.ctrlKey));
-                showSelector(selector, { x: event.x, y: event.y });
+                throw new Error('There\'s no selector initialized for the field');
             }
         }));
 
-    // Click on selector's cell event fires VALUE_SET event
-    selectorElement.querySelectorAll('.cell').forEach((e, i) => {
-        e.addEventListener('click', function (event) {
-            if (selector) {
-                selector.setValue(Number(event.target.dataset.number));
-                showSelector(selector, {})
-            }
+    selectorElement.querySelectorAll('.cell')
+        .forEach((e, i) => {
+            e.addEventListener('click', function (event) {
+                if (selector) {
+                    selector.setValue(selectedCellIndex, Number(e.dataset.number), supposedFlag);
+                    showSelector(selector, { index: selectedCellIndex, supposed: supposedFlag });
+                }
+                else {
+                    throw new Error('There\'s no selector initialized for the field');
+                }
+            });
         });
-    });
 
 });
 
