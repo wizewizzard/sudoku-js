@@ -13,10 +13,9 @@ function FixedSizeQueue (cap) {
 
 FixedSizeQueue.prototype.put = function (...items) {
     items.forEach(item => {
-        console.debug('Adding ', item);
         if(this.length === 0) {
             this.storage[this.startIndex] = item;
-            console.debug('Length is 0. Adding at the start ', item)
+            this.endIndex = this.startIndex;
         }
         else{
             this.endIndex = (this.endIndex + 1) % this.capacity;
@@ -35,6 +34,9 @@ FixedSizeQueue.prototype.pop = function () {
         const item = this.storage[this.startIndex];
         this.startIndex = (this.startIndex + 1) % this.capacity;
         this.length --;
+        if(this.length === 0) {
+            this.endIndex = this.startIndex;
+        }
         return item;
     }
 }
@@ -42,7 +44,6 @@ FixedSizeQueue.prototype.pop = function () {
 FixedSizeQueue.prototype[Symbol.iterator] = function () {
     let index = this.startIndex;
     let count = 0;
-    console.debug(this.storage)
     return {
         next: () => {
             if( count >= this.length) {

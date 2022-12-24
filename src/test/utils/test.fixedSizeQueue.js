@@ -61,7 +61,7 @@ describe("Fixed size queue", function(){
         });
     });
     describe("Combining popping and adding", function() {
-        it("Order of popped elements should be the same as the order they were added", function () {
+        it("Should correctly override old values", function () {
             const queue = new FixedSizeQueue(5);
             queue.put(3, 1, 3, 0, 5, 4, 9, 8);
             chai.expect(queue.length).to.equal(5);
