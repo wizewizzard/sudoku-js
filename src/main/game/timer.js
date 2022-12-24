@@ -39,9 +39,6 @@ function Timer() {
     }
 
     this.getTime = function () {
-        if (!isRunning) {
-            throw new Error('Timer is not running');
-        }
         if (!paused) {
             return new Date().getTime() - startedAt.getTime();
         }

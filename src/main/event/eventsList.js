@@ -10,7 +10,8 @@ const events = Object.freeze({
     CELL_SELECTED: 'cellSelected',
     FIELD_UPDATED: 'fieldUpdated',
     FIELD_FILLED: 'fieldIsFull',
-    WIN_CONDITION: 'winCondition'
+    WIN_CONDITION: 'winCondition',
+    HISTORY_UPDATED: 'historyUpdated'
 });
 
 
