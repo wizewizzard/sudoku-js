@@ -14,11 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const winConditionModalElement = document.getElementById('winConditionModal');
     const pauseButtonElement = document.getElementById('pauseGameButton');
     const timerResultElement = document.getElementById('timeResult');
-
-    const gameController = new GameController();
-    let selector;
-    let timerPollInterval;
-    let selectedCellIndex, supposedFlag;
+    const gameHistoryElement = document.getElementById('gameHistoryList');
 
     const updateSub = (_, {field}) => { renderField(field); }
     const timerPollSub = () => { timerPollInterval = setInterval(() => renderTimer(gameController.getTime()), 80); };
@@ -32,10 +28,28 @@ document.addEventListener('DOMContentLoaded', function () {
         timerResultElement.textContent = formatMsForTimer(gameController.getTime());
         winConditionModalElement.style.display = 'block';
     }
+    const historySub = function (_, {history}) {
+        log('Histroy: ', history);
+        const elements = history.map(rec => {
+            const listRecordElement = document.createElement('li');
+            listRecordElement.innerHTML = rec.result + ' ' + rec.difficulty + ' ' + rec.time; 
+            return listRecordElement;
+        })
+        .reverse();
+        gameHistoryElement.innerHTML = '';
+        gameHistoryElement.append(...elements)
+    }
+
     emitter.subscribe(events.FIELD_UPDATED, updateSub);
     emitter.subscribe(events.GAME_START, timerPollSub);
     emitter.subscribe(events.GAME_ENDED, timerPollStopSub);
     emitter.subscribe(events.WIN_CONDITION, winSub);
+    emitter.subscribe(events.HISTORY_UPDATED, historySub);
+
+    const gameController = new GameController();
+    let selector;
+    let timerPollInterval;
+    let selectedCellIndex, supposedFlag;
 
     document.getElementById('gameForm').addEventListener('submit', function (event) {
         event.preventDefault();

@@ -4,9 +4,11 @@ import Selector from "./selector.js";
 import emitter from "../event/emitter.js";
 import Timer from "./timer.js";
 import { events } from "../event/eventsList.js";
+import GameHistory from "./gameHistory.js";
 
 function GameController() {
-    const gameHistory = {};
+    const gameHistory = new GameHistory();
+    gameHistory.load();
     let field;
     let selector;
     let timer;
@@ -19,6 +21,8 @@ function GameController() {
     };
     const endSub = () => { 
         this.cleanUp();
+        gameHistory.addRecord({result: 'END', difficulty: 'UNKNOWN', time: timer.getTime()});
+        gameHistory.persist();
         emitter.unSubscribe(events.GAME_ENDED, endSub);
     };
 
