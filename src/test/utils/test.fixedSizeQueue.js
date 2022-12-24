@@ -60,4 +60,42 @@ describe("Fixed size queue", function(){
             chai.expect(queue.length).to.equal(0);
         });
     });
+    describe("Combining popping and adding", function() {
+        it("Order of popped elements should be the same as the order they were added", function () {
+            const queue = new FixedSizeQueue(5);
+            queue.put(3, 1, 3, 0, 5, 4, 9, 8);
+            chai.expect(queue.length).to.equal(5);
+            chai.expect([...queue]).to.eql([0, 5, 4, 9, 8]);
+            queue.pop();
+            queue.pop();
+            queue.pop();
+            queue.pop();
+            queue.pop();
+            queue.put(1, 2, 3);
+            chai.expect([...queue]).to.eql([1, 2, 3]);
+        })
+    });
+    describe("Testing one element sized queue", function() {
+        it("Should add and pop elements into / from one sized element queue", function () {
+            const queue = new FixedSizeQueue(1);
+            queue.put(3);
+            chai.expect(queue.length).to.equal(1);
+            chai.expect(queue.pop()).to.equal(3);
+            chai.expect(queue.length).to.equal(0);
+            queue.put(5);
+            chai.expect(queue.length).to.equal(1);
+            chai.expect(queue.pop()).to.equal(5);
+            chai.expect(queue.length).to.equal(0);
+            queue.put(8);
+            chai.expect([...queue]).to.eql([8]);
+        });
+        it("After adding multiple values only the last one should remain ", function () {
+            const queue = new FixedSizeQueue(1);
+            queue.put(3, 7, 6);
+            chai.expect(queue.length).to.equal(1);
+            chai.expect([...queue]).to.eql([6]);
+            chai.expect(queue.pop()).to.equal(6);
+            chai.expect(queue.length).to.equal(0);
+        });
+    });
 });
