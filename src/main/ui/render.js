@@ -42,12 +42,12 @@ function getFieldUI(fieldElement) {
 function getSelectorUI(selectorElement) {
     return {
         render(selector, { x, y, index, supposed }) {
-            if (!selector) {
-                console.error("No selector to render");
+            if (!selector || selector.isDisabled()) {
+                console.error("Unable to render the selector. The selector is not initialized or it is disabled");
                 return;
             }
             selectorElement.querySelectorAll('.cell').forEach(element => {
-                if (selector.isSelected(index, Number(element.dataset.number), supposed)) {
+                if (selector.isValueAlreadySelected(index, Number(element.dataset.number), supposed)) {
                     element.classList.add('selected');
                 }
                 else {
