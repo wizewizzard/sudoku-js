@@ -5,71 +5,77 @@ import emitter from "../event/emitter.js";
 import Timer from "./timer.js";
 import { events } from "../event/eventsList.js";
 import GameHistory from "./gameHistory.js";
+import getDifficulty from "./difficultyRange.js";
 
 function GameController() {
     const gameHistory = new GameHistory();
-    gameHistory.load();
-    let field;
-    let selector;
-    let timer;
-    let isGameInProgress;
+    
+
+    this.state = {
+        gameHistory: new GameHistory()
+    }
+
+    this.state.gameHistory.load();
 
     const winSub = () => { 
-        isGameInProgress = false;
-        emitter.emit(events.GAME_ENDED, {});
+        this.state.isGameInProgress = false;
+        this.state.victory = true;
+        emitter.emit(events.GAME_ENDED, );
         emitter.unSubscribe(events.WIN_CONDITION, winSub);
     };
     const endSub = () => { 
-        this.cleanUp();
-        gameHistory.addRecord({result: 'END', difficulty: 'UNKNOWN', time: timer.getTime()});
+        this.state.timer.stop();
+        gameHistory.addRecord({
+            result: this.state.victory ? {code: 'win', label: 'Victory'} : {code: 'lose', label: 'Lost'}, 
+            difficulty: this.state.difficulty, 
+            time: this.state.timer.getTime()
+        });
         gameHistory.persist();
+        this.state.selector.disable();
+        this.state = {gameHistory: this.state.gameHistory};
         emitter.unSubscribe(events.GAME_ENDED, endSub);
     };
 
     this.start = function (startCellsNum) {
-        if( isGameInProgress ) {
+        if( this.state?.isGameInProgress ) {
             emitter.emit(events.GAME_ENDED);
         }
-        timer = new Timer();
+        this.state.timer = new Timer();
         const generator = new Generator();
-        field = new EmittingField(generator.createFieldOfNumberOfCells(startCellsNum));
-        selector = new Selector(field);
-        isGameInProgress = true;
-        timer.start();
+        this.state.field = new EmittingField(generator.createFieldOfNumberOfCells(startCellsNum));
+        this.state.selector = new Selector(this.state.field);
+        this.state.difficulty = getDifficulty(startCellsNum);
+        this.state.isGameInProgress = true;
+        this.state.timer.start();
         emitter.subscribe(events.WIN_CONDITION, winSub);
         emitter.subscribe(events.GAME_ENDED, endSub);
         emitter.emit(events.GAME_START);
-        emitter.emit(events.FIELD_UPDATED, {field});
-        return { selector };
+        emitter.emit(events.FIELD_UPDATED, {field: this.state.field});
+        return { selector: this.state.selector };
     }
 
     this.restart = function () {
         throw new Error('Not implemented');
     }
 
-    this.cleanUp = function () {
-        timer.stop();
-        isGameInProgress = false;
-        selector.disable();
-    }
     this.pause = function () {
-        selector.disable();
-        timer.pause();
+        this.state.selector.disable();
+        this.state.timer.pause();
         emitter.emit(events.GAME_PAUSE);
     }
 
     this.unpause = function () {
-        selector.enable();
-        timer.unpause();
+        this.state.selector.enable();
+        this.state.timer.unpause();
         emitter.emit(events.GAME_UNPAUSE);
     }
 
     this.isGameInProgress = function () {
-        return isGameInProgress;
+        return this.state.isGameInProgress;
     }
 
     this.getTime = function() {
-        return timer.getTime();
+        return this.state.timer.getTime();
     }
 
 }

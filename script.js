@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
         log('Histroy: ', history);
         const elements = history.map(rec => {
             const listRecordElement = document.createElement('li');
-            listRecordElement.innerHTML = rec.result + ' ' + rec.difficulty + ' ' + rec.time; 
+            listRecordElement.innerHTML = rec.result.label + ' ' + rec.difficulty.label + ' ' + formatMsForTimer(rec.time); 
             return listRecordElement;
         })
         .reverse();
