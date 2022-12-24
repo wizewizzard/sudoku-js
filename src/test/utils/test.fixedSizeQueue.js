@@ -8,6 +8,12 @@ describe("Fixed size queue", function(){
             chai.expect([...queue]).to.eql([]);
             chai.expect(queue.length).to.equal(0);
         });
+        it("Queue with single value provides single valued array", function () {
+            const queue = new FixedSizeQueue(5);
+            queue.put(1);
+            chai.expect([...queue]).to.eql([1]);
+            chai.expect(queue.length).to.equal(1);
+        });
         it("Supports adding null values", function () {
             const queue = new FixedSizeQueue(5);
             queue.put(1);
