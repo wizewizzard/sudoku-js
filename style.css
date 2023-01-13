@@ -3,8 +3,11 @@ html{
 }
 body{
     min-height: 100%;
-    font: 1.2em "Fira Sans", sans-serif;
+    font: 16px "Fira Sans", sans-serif;
     color: #111;
+}
+ul {
+    list-style-type: none;
 }
 
 .grid3x3 {
@@ -46,30 +49,19 @@ body{
     background-color: rgb(182, 240, 255);
 }
 #sudoku-grid .cell{
-    height:50px;
-    width:50px;
+    height:60px;
+    width:60px;
     border:1px solid;
-    text-align:center;
-    cursor: pointer;
     transition: 0.3s;
-    line-height: 50px;
-}
-
-#container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    line-height: 60px;
+    font-size: 1.3em;
 }
 
 #prefix{
-    font-size: small;
+    font-size: 0.8em;
     background-color: #ddd;
     padding: 10px 20px;
     border-radius: 10px;
-}
-
-#sudoku-grid {
-    margin: 1em 0px;
 }
 
 .supposedValues{
@@ -111,7 +103,7 @@ body{
 }
 
 .modalBackground{
-     display: none; 
+    display: none; 
     position: fixed; /* Stay in place */
     z-index: 3; /* Sit on top */
     left: 0;
@@ -133,6 +125,7 @@ body{
 }
 
 .cell{
+    text-align:center;
     cursor: pointer;
 }
 
@@ -176,29 +169,29 @@ body{
           -ms-user-select: none; /* Internet Explorer/Edge */
               user-select: none; /* Non-prefixed version, currently
                                     supported by Chrome, Edge, Opera and Firefox */
-  }
+}
 
-  .difficulty{
+.difficulty{
     font-weight: lighter;
     font-size: 0.7em;
     color: #555;
-  }
-  .difficulty-vhard{
+}
+.difficulty-vhard{
     color: hsl(0, 80%, 49%);
-  }
-  
-  .difficulty-hard{
+}
+
+.difficulty-hard{
     color: hsl(19, 80%, 50%);
-  }
+}
 
-  .difficulty-normal{
+.difficulty-normal{
     color: hsl(59, 79%, 63%);
-  }
+}
 
-  .difficulty-easy{
+.difficulty-easy{
     color: hsl(100, 100%, 60%);
-  }
+}
 
-  .difficulty-veasy{
+.difficulty-veasy{
     color: hsl(118, 78%, 44%);
-  }
+}
