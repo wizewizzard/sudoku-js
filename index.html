@@ -10,77 +10,66 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="container mt-4">
-        <header id="header" class="d-flex">
+    <header>
+        <div class="container">
             <h2>Sudoku game</h2>
             <p>Some text bla bla</p>
-        </header>
-        <main id="" class="d-flex flex-row justify-content-center align-items-start">
-            <div id = "sudoku-grid" class="grid3x3 flex-grow-0 overflow-hidden"></div>
-            <div class="row flex-grow-0">
-                <section class="overflow-hidden col-12">
-                    <div id="gameHistory">
-                        <h2>Game history</h2>
-                        <ul id="gameHistoryList" class="overflow-auto">
-                        </ul>
-                    </div>
-                    <div id="timer">
-                        <h2>Timer</h2>
-                        <p id="timerDisplay">00:00:00</p>
-                    </div>
-                    <div>
-                        <form id="gameForm">
-                            <div class="">
-                                <div>
-                                    <label for="difficultyRange">Choose difficulty:</label>
-                                    <input id="difficultyRange" type="range" min="17" max="80" step="1" value="30">
-                                 </div>
-                                 <div class="difficulty">
-                                    <p id="difficultyLabel"></p>
-                                    <p>You will start from <span id="difficultyRangeValue">30</span> number of cells</p>
-                                </div>
-                            </div>
-                            <div>
-                                <button class="button" id="startNewGameButton" value="New game"><span class="buttonText">New game</span></button>
-                                <button class="button" id="restartGameButton" value="Restart game"><span class="buttonText">Restart</span></button>
-                                <button class="button" id="pauseGameButton" value="Pause"><span class="buttonText">Pause</span></button>                            
-                            <!-- <button class="button"><span class="buttonText">Solve it for me please :(</span></button> -->
-                        </form>
-                    </div>
-                </section>
-                <hr />
-                <div id = "prefix" class="muted col-12">
-                    <p>This is a standard sudoku game.</p> 
-                    <p>Use single click to put a real value. Ctrl + click to put a supposed value.</p>
-                </div>
-            </div>
-        </main>
         </div>
+    </header>
+    <main>
+        <div id = "sudoku-grid" class="grid3x3 flex-grow-0 overflow-hidden"></div>
         <div id = "numberSelector">
             <span  class="text"></span><i class="fa fa-window-close" aria-hidden="true"></i>
             <div class="grid3x3">
-                <div class="cell noselect" data-number="1">1</div>
-                <div class="cell noselect" data-number="2">2</div>
-                <div class="cell noselect" data-number="3">3</div>
-                <div class="cell noselect" data-number="4">4</div>
-                <div class="cell noselect" data-number="5">5</div>
-                <div class="cell noselect" data-number="6">6</div>
-                <div class="cell noselect" data-number="7">7</div>
-                <div class="cell noselect" data-number="8">8</div>
-                <div class="cell noselect" data-number="9">9</div>
             </div>
         </div>
-        
-        <div id="winConditionModal" class="modalBackground">
-            <div class="modalContent">
-                <span  class="text"></span><i class="fa fa-window-close" aria-hidden="true"></i>
-                <h3>You won!</h3>
-                <p>Your time is <span id="timeResult"></span></p>
+        <div class="row flex-grow-0">
+            <section class="overflow-hidden col-12">
+                <div id="gameHistory">
+                    <h2>Game history</h2>
+                    <ul id="gameHistoryList" class="overflow-auto">
+                    </ul>
+                </div>
+                <div id="timer">
+                    <h2>Timer</h2>
+                    <p id="timerDisplay">00:00:00</p>
+                </div>
+                <div>
+                    <form id="gameForm">
+                        <div class="">
+                            <div>
+                                <label for="difficultyRange">Choose difficulty:</label>
+                                <input id="difficultyRange" type="range" min="17" max="80" step="1" value="30">
+                                </div>
+                                <div class="difficulty">
+                                <p id="difficultyLabel"></p>
+                                <p>You will start from <span id="difficultyRangeValue">30</span> number of cells</p>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="button" id="startNewGameButton" value="New game"><span class="buttonText">New game</span></button>
+                            <button class="button" id="restartGameButton" value="Restart game"><span class="buttonText">Restart</span></button>
+                            <button class="button" id="pauseGameButton" value="Pause"><span class="buttonText">Pause</span></button>                            
+                        <!-- <button class="button"><span class="buttonText">Solve it for me please :(</span></button> -->
+                    </form>
+                </div>
+            </section>
+            <hr />
+            <div id = "prefix" class="muted col-12">
+                <p>This is a standard sudoku game.</p> 
+                <p>Use single click to put a real value. Ctrl + click to put a supposed value.</p>
             </div>
         </div>
-        <footer class="bg-light">
-            This is a footer
-        </footer>
+    </main>
+    <footer class="bg-light">
+        This is a footer
+    </footer>
+    <div id="winConditionModal" class="modalBackground">
+        <div class="modalContent">
+            <span  class="text"></span><i class="fa fa-window-close" aria-hidden="true"></i>
+            <h3>You won!</h3>
+            <p>Your time is <span id="timeResult"></span></p>
+        </div>
     </div>
     <script type="module" src="script.js" ></script>
 </body>
