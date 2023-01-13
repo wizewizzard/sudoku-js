@@ -3,7 +3,7 @@ import emitter from "../event/emitter.js";
 import { events } from "../event/eventsList.js";
 
 function GameHistory () {
-    this.queue = new FixedSizeQueue(5);
+    this.queue = new FixedSizeQueue(10);
 
     this.load = function () {
         if(localStorage.getItem('gameHistory')) {

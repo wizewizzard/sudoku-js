@@ -8,8 +8,6 @@ import GameHistory from "./gameHistory.js";
 import getDifficulty from "./difficultyRange.js";
 
 function GameController() {
-    const gameHistory = new GameHistory();
-    
 
     this.state = {
         gameHistory: new GameHistory()
@@ -25,12 +23,12 @@ function GameController() {
     };
     const endSub = () => { 
         this.state.timer.stop();
-        gameHistory.addRecord({
+        this.state.gameHistory.addRecord({
             result: this.state.victory ? {code: 'win', label: 'Victory'} : {code: 'lose', label: 'Lost'}, 
             difficulty: this.state.difficulty, 
             time: this.state.timer.getTime()
         });
-        gameHistory.persist();
+        this.state.gameHistory.persist();
         this.state.selector.disable();
         this.state = {gameHistory: this.state.gameHistory};
         emitter.unSubscribe(events.GAME_ENDED, endSub);
