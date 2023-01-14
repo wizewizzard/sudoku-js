@@ -22,9 +22,14 @@ function getFieldUI(fieldElement) {
                 else {
                     cellElement.querySelector('.value').textContent = '';
                     if (cell.getSupposedValues() && cell.getSupposedValues().length > 0) {
-                        supposedValuesDiv.classList.remove('hidden');
-                        const supposedValuesString = cell.getSupposedValues().join(' ');
-                        supposedValuesDiv.textContent = supposedValuesString;
+                        supposedValuesDiv.classList.remove('hidden');                      
+                        supposedValuesDiv.innerHTML = '';
+                        cell.getSupposedValues().forEach(v => {
+                            const numberContrainer = document.createElement('div');
+                            numberContrainer.textContent = v;
+                            supposedValuesDiv.append(numberContrainer);
+                        })
+                        
                     }
                     else {
                         supposedValuesDiv.classList.add('hidden');
@@ -57,11 +62,11 @@ function getSelectorUI(selectorElement) {
             if (x && y) {
                 selectorElement.style.left = x + "px";
                 selectorElement.style.top = y + "px";
-                selectorElement.style.display = 'block';
+                selectorElement.classList.remove('hidden');
             }
         },
         hide() {
-            selectorElement.style.display = 'none';
+            selectorElement.classList.add('hidden');
         }
     };
 }

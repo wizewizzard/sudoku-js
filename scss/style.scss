@@ -1,0 +1,82 @@
+@use './fonts' as fonts;
+@use './field' as field;
+@use './difficulty' as difficulty;
+@use './util';
+
+body {
+    font-size: fonts.$font-size;
+}
+
+header {
+    padding: 20px 40px;
+}
+
+footer {
+    padding: 20px 40px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+p {
+    margin: 0;
+}
+
+.button{
+    padding: 10px 20px;
+    border: 1px solid #999;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bolder;
+}
+
+.layout {
+    #field-col {
+        padding: 30px;
+        flex-shrink: 0;
+        flex-grow: 0;
+    }
+
+    #additional-col {
+        padding: 30px;
+        flex-shrink: 1;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+
+        & > * {
+            margin-bottom: 20px;
+        }
+    }
+}
+
+#timer {
+    padding: 0px 30px;
+
+    .timer-icon {
+        margin-right: 10px;
+    }
+    #timerDisplay {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 1.3rem;
+    }
+}
+
+#gameHistory {
+    padding: 0px 30px;
+
+    #gameHistoryList {
+        overflow: auto;
+    }
+}
+
+#gameFormContainer {
+    padding: 0px 30px;
+}
+
+#prefix {
+    padding: 0px 30px;
+}
