@@ -6,7 +6,7 @@ A well known Sudoku game. No server.
 ## Task
 - &#9745; Implement an algorithm that generates a consistent field for sudoku game.
 - &#9745; Allow user to select difficulty
-- &#9745; Implement the game process
+- &#9744; Implement the game process (Restart button is not yet implemented)
 - &#9745; Add a timer that tracks how much time player spends to resolve a given field
 - &#9744; Create a game history that stores *n* previous games of a player (Bugs sometimes)
 - &#9744; Add "give a hint" button
