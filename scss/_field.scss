@@ -1,0 +1,111 @@
+$standard-field-size: 600px;
+$clipped-field-size: 400px;
+
+
+.grid3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+.quadrant{
+    border: 1px solid black;
+}
+
+.cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    aspect-ratio : 1 / 1;
+}
+
+.unmodifiable{
+    color:rgb(124, 135, 158);
+}
+
+#sudoku-grid {
+    margin: 0px auto;
+
+    & > .quadrant:nth-child(odd) > .cell:nth-child(even), & > .quadrant:nth-child(even) > .cell:nth-child(odd)  {
+        background-color: rgb(187, 200, 202);
+    }
+
+    @media (min-width: 1201px) {
+        width: $standard-field-size;
+        height: $standard-field-size;
+    }
+
+    @media (max-width: 1200px) {
+        width: $clipped-field-size;
+        height: $clipped-field-size;
+    }
+
+    .cell {
+        overflow: hidden;
+
+        .supposedValues {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+
+            & > * {
+                flex-basis: 33.3%;
+                flex-grow: 1;
+                flex-shrink: 0;
+                @media (max-width: 1200px) {
+                    font-size: 0.65rem;
+                }
+                @media (min-width: 1201px) {
+                    font-size: 0.85rem;
+                }
+            }
+        }
+
+        .value {
+            font-size: 1.2rem;
+            font-weight: bolder;
+        }
+
+    }
+}
+
+#numberSelector {
+    position: absolute;
+    box-shadow: inset 0px 0px 0px 2px rgb(25, 75, 182);
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(219, 219, 219);
+
+    & > * {
+        flex-grow: 1;
+    }
+
+    & > .grid3x3 {
+        flex-grow: 0;
+    }
+
+    @media (min-width: 1201px) {
+        width: 200px;
+        height: 250px;
+    }
+
+    @media (max-width: 1200px) {
+        width: 120px;
+        height: 150px;
+    }
+
+    .cell {
+        * {
+            font-size: 0.9rem;
+        }
+
+        &.selected {
+            color: #888;
+        }
+    }
+}

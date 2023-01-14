@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     const winSub = () => {
         timerResultElement.textContent = formatMsForTimer(gameController.getTime());
-        winConditionModalElement.style.display = 'block';
+        winConditionModalElement.classList.remove('hidden');
     }
     const historySub = function (_, {history}) {
         log('Histroy: ', history);
@@ -59,9 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectorGrid = selectorElement.querySelector('.grid3x3');
         for( let i = 0; i < 9 ; i ++) {
             const cellElement = document.createElement('div');
+            const numberSpan = document.createElement('span');
+            numberSpan.textContent = i + 1
             cellElement.classList.add('cell', 'noselect');
             cellElement.dataset.number = i + 1;
-            cellElement.textContent = i + 1;
+            cellElement.append(numberSpan); 
             selectorGrid.append(cellElement);
         }
 
@@ -143,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     winConditionModalElement.querySelector('.fa-window-close').addEventListener('click', function () {
-        winConditionModalElement.style.display = 'none';
+        winConditionModalElement.classList.add('hidden');
     });
 
     selectorElement.querySelector('.fa-window-close').addEventListener('click', function () {

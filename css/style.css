@@ -1,0 +1,246 @@
+.grid3x3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.quadrant {
+  border: 1px solid black;
+}
+
+.cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  aspect-ratio: 1/1;
+}
+
+.unmodifiable {
+  color: rgb(124, 135, 158);
+}
+
+#sudoku-grid {
+  margin: 0px auto;
+}
+#sudoku-grid > .quadrant:nth-child(odd) > .cell:nth-child(even), #sudoku-grid > .quadrant:nth-child(even) > .cell:nth-child(odd) {
+  background-color: rgb(187, 200, 202);
+}
+@media (min-width: 1201px) {
+  #sudoku-grid {
+    width: 600px;
+    height: 600px;
+  }
+}
+@media (max-width: 1200px) {
+  #sudoku-grid {
+    width: 400px;
+    height: 400px;
+  }
+}
+#sudoku-grid .cell {
+  overflow: hidden;
+}
+#sudoku-grid .cell .supposedValues {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+#sudoku-grid .cell .supposedValues > * {
+  flex-basis: 33.3%;
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+@media (max-width: 1200px) {
+  #sudoku-grid .cell .supposedValues > * {
+    font-size: 0.65rem;
+  }
+}
+@media (min-width: 1201px) {
+  #sudoku-grid .cell .supposedValues > * {
+    font-size: 0.85rem;
+  }
+}
+#sudoku-grid .cell .value {
+  font-size: 1.2rem;
+  font-weight: bolder;
+}
+
+#numberSelector {
+  position: absolute;
+  box-shadow: inset 0px 0px 0px 2px rgb(25, 75, 182);
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(219, 219, 219);
+}
+#numberSelector > * {
+  flex-grow: 1;
+}
+#numberSelector > .grid3x3 {
+  flex-grow: 0;
+}
+@media (min-width: 1201px) {
+  #numberSelector {
+    width: 200px;
+    height: 250px;
+  }
+}
+@media (max-width: 1200px) {
+  #numberSelector {
+    width: 120px;
+    height: 150px;
+  }
+}
+#numberSelector .cell * {
+  font-size: 0.9rem;
+}
+#numberSelector .cell.selected {
+  color: #888;
+}
+
+.difficulty {
+  font-weight: lighter;
+  font-size: 0.7em;
+  color: #555;
+}
+
+.difficulty-vhard {
+  color: hsl(0deg, 80%, 49%);
+}
+
+.difficulty-hard {
+  color: hsl(19deg, 80%, 50%);
+}
+
+.difficulty-normal {
+  color: hsl(59deg, 79%, 63%);
+}
+
+.difficulty-easy {
+  color: hsl(100deg, 100%, 60%);
+}
+
+.difficulty-veasy {
+  color: hsl(118deg, 78%, 44%);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: gray;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */ /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+   supported by Chrome, Edge, Opera and Firefox */
+}
+
+.fa-window-close {
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  cursor: pointer;
+}
+
+.modalBackground {
+  position: fixed; /* Stay in place */
+  z-index: 3; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.modalContent {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  position: relative;
+}
+
+body {
+  font-size: 16px;
+}
+
+header {
+  padding: 20px 40px;
+}
+
+footer {
+  padding: 20px 40px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.button {
+  padding: 10px 20px;
+  border: 1px solid #999;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bolder;
+}
+
+.layout #field-col {
+  padding: 30px;
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+.layout #additional-col {
+  padding: 30px;
+  flex-shrink: 1;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.layout #additional-col > * {
+  margin-bottom: 20px;
+}
+
+#timer {
+  padding: 0px 30px;
+}
+#timer .timer-icon {
+  margin-right: 10px;
+}
+#timer #timerDisplay {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1.3rem;
+}
+
+#gameHistory {
+  padding: 0px 30px;
+}
+#gameHistory #gameHistoryList {
+  overflow: auto;
+}
+
+#gameFormContainer {
+  padding: 0px 30px;
+}
+
+#prefix {
+  padding: 0px 30px;
+}/*# sourceMappingURL=style.css.map */
