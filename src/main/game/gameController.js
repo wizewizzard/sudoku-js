@@ -6,6 +6,7 @@ import Timer from "./timer.js";
 import { events } from "../event/eventsList.js";
 import GameHistory from "./gameHistory.js";
 import getDifficulty from "./difficultyRange.js";
+import Field from "../field/field.js";
 
 function GameController() {
 
@@ -14,6 +15,12 @@ function GameController() {
     }
 
     this.state.gameHistory.load();
+
+    const startSub = () => {
+        this.state.timer = new Timer();
+        this.state.isGameInProgress = true;
+        this.state.timer.start();
+    };
 
     const winSub = () => { 
         this.state.isGameInProgress = false;
@@ -30,45 +37,71 @@ function GameController() {
         });
         this.state.gameHistory.persist();
         this.state.selector.disable();
-        this.state = {gameHistory: this.state.gameHistory};
         emitter.unSubscribe(events.GAME_ENDED, endSub);
     };
 
-    this.start = function (startCellsNum) {
-        if( this.state?.isGameInProgress ) {
-            emitter.emit(events.GAME_ENDED);
+    this.resetState = function () {
+        this.state = {
+            gameHistory: this.state.gameHistory
+        };
+    }
+
+    this.start = function(startCellsNum) {
+        if( this.isGameInProgress() ) {
+            this.stop();
         }
-        this.state.timer = new Timer();
+
+        this.resetState();
         const generator = new Generator();
-        this.state.field = new EmittingField(generator.createFieldOfNumberOfCells(startCellsNum));
+        const generatedArray = generator.generateConsistentFieldArrayForNumberOfCells(startCellsNum);
+        this.state.initialField = new Field(generatedArray);
+        this.state.field = new EmittingField(new Field([...this.state.initialField].map(v => v.getValue())));
         this.state.selector = new Selector(this.state.field);
         this.state.difficulty = getDifficulty(startCellsNum);
-        this.state.isGameInProgress = true;
-        this.state.timer.start();
+        
+        emitter.subscribe(events.GAME_START, startSub);
         emitter.subscribe(events.WIN_CONDITION, winSub);
         emitter.subscribe(events.GAME_ENDED, endSub);
+
         emitter.emit(events.GAME_START);
         emitter.emit(events.FIELD_UPDATED, {field: this.state.field});
         return { selector: this.state.selector };
     }
 
-    this.restart = function () {
-        throw new Error('Not implemented');
+    this.restart = function() {
+        if( this.isGameInProgress() ) {
+            this.stop();
+        }
+        this.state.field = new EmittingField(new Field([...this.state.initialField].map(v => v.getValue())));
+        this.state.selector = new Selector(this.state.field);
+
+        emitter.subscribe(events.GAME_START, startSub);
+        emitter.subscribe(events.WIN_CONDITION, winSub);
+        emitter.subscribe(events.GAME_ENDED, endSub);
+
+        emitter.emit(events.GAME_START);
+        emitter.emit(events.FIELD_UPDATED, {field: this.state.field});
+        return { selector: this.state.selector };
     }
 
-    this.pause = function () {
+    this.stop = function() {
+        this.state.isGameInProgress = false;
+        emitter.emit(events.GAME_ENDED);
+    }
+
+    this.pause = function() {
         this.state.selector.disable();
         this.state.timer.pause();
         emitter.emit(events.GAME_PAUSE);
     }
 
-    this.unpause = function () {
+    this.unpause = function() {
         this.state.selector.enable();
         this.state.timer.unpause();
         emitter.emit(events.GAME_UNPAUSE);
     }
 
-    this.isGameInProgress = function () {
+    this.isGameInProgress = function() {
         return this.state.isGameInProgress;
     }
 

@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     document.getElementById('startNewGameButton').addEventListener('click', function (event) {
-        if (gameController.isGameInProgress === true) {
-            gameController.cleanUp();
+        if (gameController.isGameInProgress()) {
+            gameController.stop();
         }
 
         clearTimer();
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('restartGameButton').addEventListener('click', function (event) {
-        //emitter.emit({ eventName: events.GAME_RESTART, data: {startCellsNum}});
+        ({ selector } = gameController.restart());
     });
 
     pauseButtonElement.addEventListener('click', function (event) {
