@@ -42,7 +42,7 @@ class Generator{
         return field.getValuesFlat();
     }
 
-    createFieldOfNumberOfCells(numberOfCells){
+    generateConsistentFieldArrayForNumberOfCells(numberOfCells) {
         const generatedFieldArray = this.generateConsitentFieldArray();
         let actualValuesCount = generatedFieldArray.length;
         while(actualValuesCount > numberOfCells){
@@ -60,6 +60,11 @@ class Generator{
             }
             actualValuesCount--;
         }
+        return generatedFieldArray;
+    }
+
+    createFieldOfNumberOfCells(numberOfCells){
+        
     
         return new Field(generatedFieldArray);
     }
